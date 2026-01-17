@@ -20,28 +20,30 @@ This repository provides a Docker-based setup for a small Laravel application, i
 
 1. **Clone** or **download** this repository.
 
-2. Navigate to the project root (where `docker-compose.yml` is located).
+2. Create your `.env` file using the `.env.example` and update the custom settings section with appropriate values
 
-3. Run the following command to start the services:
+3. Navigate to the project root (where `docker-compose.yml` is located).
+
+4. Run the following command to start the services:
 
    ```bash
    docker-compose up -d
    ```
 
-4. To access the application container for commands (e.g., migrations, artisan):
+5. To access the application container for commands (e.g., migrations, artisan):
 
    ```bash
    docker exec -it php_app bash
    ```
 
-5. Create admin user:
+6. Create admin user:
 
 ```php
 php artisan tinker
 \App\Models\User::create(['name' => 'Admin User', 'email' => 'enter email', 'password' => bcrypt('enter password')]);
 ```
 
-6. Run optimisation after deployment
+7. Run optimisation after deployment
  
 ```bash
 php artisan optimize
