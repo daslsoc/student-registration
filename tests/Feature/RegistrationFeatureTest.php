@@ -9,6 +9,7 @@ use App\Models\ParentModel;
 use App\Models\Child;
 use App\Models\Payment;
 use App\Models\StudentNumberTracker;
+use App\Models\User;
 
 /**
  * Class RegistrationFeatureTest
@@ -43,6 +44,10 @@ class RegistrationFeatureTest extends TestCase
      */
     public function test_can_submit_single_child_registration()
     {
+        // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $response = $this->post('/registration', [
             'parent1_first_name' => 'Jane',
             'parent1_last_name' => 'Doe',
@@ -51,6 +56,8 @@ class RegistrationFeatureTest extends TestCase
             'emergency_contact_name' => 'Alice',
             'emergency_contact_phone' => '5555678541',
             'relationship_to_family' => 'Aunt',
+            'postcode' => '5678',
+            'guidelines_accepted' => true,
             'children' => [
                 [
                     'first_name' => 'ChildOne',
@@ -59,9 +66,11 @@ class RegistrationFeatureTest extends TestCase
                     'date_of_birth' => '2010-01-01',
                     'residency_status' => 'Citizen',
                     'day_school_name' => 'ABC School',
-                    'day_school_year' => 5,
+                    'day_school_year' => 'Grade 5',
                     'dhamma_class' => 'Class 2 (C)',
                     'sinhala_class' => 'Class 3 (D)',
+                    'student_number' => '001',
+                    'photography_allowed' => true,
                 ],
             ],
         ]);
@@ -86,14 +95,20 @@ class RegistrationFeatureTest extends TestCase
      */
     public function test_can_submit_multiple_children_registration()
     {
+        // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $response = $this->post('/registration', [
             'parent1_first_name' => 'John',
             'parent1_last_name' => 'Smith',
             'parent1_email' => 'john.smith@example.com',
             'parent1_phone' => '1234567890',
             'emergency_contact_name' => 'Bob',
-            'emergency_contact_phone' => '999999999',
+            'emergency_contact_phone' => '9999999998',
             'relationship_to_family' => 'Uncle',
+            'postcode' => '5678',
+            'guidelines_accepted' => true,
             'children' => [
                 [
                     'first_name' => 'KidOne',
@@ -102,9 +117,11 @@ class RegistrationFeatureTest extends TestCase
                     'date_of_birth' => '2012-02-02',
                     'residency_status' => 'Citizen',
                     'day_school_name' => 'XYZ School',
-                    'day_school_year' => 3,
+                    'day_school_year' => 'Grade 3',
                     'dhamma_class' => 'Class 1 (A)',
                     'sinhala_class' => 'Class 1 (B)',
+                    'student_number' => '001',
+                    'photography_allowed' => true,
                 ],
                 [
                     'first_name' => 'KidTwo',
@@ -113,9 +130,11 @@ class RegistrationFeatureTest extends TestCase
                     'date_of_birth' => '2014-03-03',
                     'residency_status' => 'Permanent Resident',
                     'day_school_name' => 'XYZ School',
-                    'day_school_year' => 1,
+                    'day_school_year' => 'Grade 1',
                     'dhamma_class' => 'Class 2 (C)',
                     'sinhala_class' => 'Class 3 (D)',
+                    'student_number' => '002',
+                    'photography_allowed' => true,
                 ],
             ],
         ]);

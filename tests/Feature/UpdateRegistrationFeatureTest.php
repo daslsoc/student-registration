@@ -6,6 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\ParentModel;
 use App\Models\Child;
+use App\Models\User;
 use Carbon\Carbon;
 
 /**
@@ -74,6 +75,7 @@ class UpdateRegistrationFeatureTest extends TestCase
      *
      * @return void
      */
+
     public function test_can_update_existing_registration()
     {
         $parent = ParentModel::factory()->create([
@@ -86,14 +88,16 @@ class UpdateRegistrationFeatureTest extends TestCase
             'parent1_first_name' => 'UpdatedFirst',
             'parent1_last_name' => 'UpdatedLast',
             'parent1_email' => $parent->parent1_email,
-            'parent1_phone' => '9999999',
+            'parent1_phone' => '9999999874',
             'parent2_first_name' => '',
             'parent2_last_name' => '',
             'parent2_email' => '',
             'parent2_phone' => '',
             'emergency_contact_name' => 'UpdatedContact',
-            'emergency_contact_phone' => '1111',
+            'emergency_contact_phone' => '1111222233',
             'relationship_to_family' => 'Cousin',
+            'postcode' => '5678',
+            'guidelines_accepted' => true,
             'children' => [
                 [
                     'id' => $child->id,
@@ -103,11 +107,13 @@ class UpdateRegistrationFeatureTest extends TestCase
                     'date_of_birth' => '2010-05-05',
                     'residency_status' => 'Permanent Resident',
                     'day_school_name' => 'XYZ School',
-                    'day_school_year' => 2,
+                    'day_school_year' => 'Grade 2',
                     'allergies' => null,
                     'special_needs' => null,
-                    'dhamma_class' => 'Grade 1',
-                    'sinhala_class' => 'Level A',
+                    'dhamma_class' => 'Class 1 (A)',
+                    'sinhala_class' => 'Class 1 (A)',
+                    'student_number' => '001',
+                    'photography_allowed' => true,
                 ],
                 // Add a new child
                 [
@@ -117,9 +123,11 @@ class UpdateRegistrationFeatureTest extends TestCase
                     'date_of_birth' => '2012-01-01',
                     'residency_status' => 'Citizen',
                     'day_school_name' => 'XYZ School',
-                    'day_school_year' => 1,
-                    'dhamma_class' => 'Grade 1',
-                    'sinhala_class' => 'Level A',
+                    'day_school_year' => 'Grade 1',
+                    'dhamma_class' => 'Class 1 (B)',
+                    'sinhala_class' => 'Class 1 (B)',
+                    'student_number' => '001',
+                    'photography_allowed' => true,
                 ],
             ],
         ]);

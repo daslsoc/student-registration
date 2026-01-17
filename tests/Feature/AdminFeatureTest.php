@@ -6,6 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\ParentModel;
 use App\Models\Child;
+use App\Models\User;
 
 /**
  * Class AdminFeatureTest
@@ -23,6 +24,10 @@ class AdminFeatureTest extends TestCase
      */
     public function test_can_view_parent_child_list()
     {
+        // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         // Create 1 parent with 2 children
         $parent = ParentModel::factory()->create([
             'parent1_first_name' => 'AdminTest',

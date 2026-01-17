@@ -1,88 +1,131 @@
-# student-registration
-This system is a stand alone PHP Laravel web application to manage student registration for a Saturday school.
+# Student Registration System
+
+This is a standalone PHP Laravel web application designed to manage student registration for a Saturday school. It handles parent and child information, payments via Stripe, email notifications, and administrative features.
 
 ## About
-This repository demonstrates a Docker-based setup for a small Laravel app with:
 
-- **PHP-FPM** for running Laravel (max ~10 concurrent processes).
-- **Nginx** reverse proxy to PHP-FPM.
-- **MySQL** database (optional: can switch to MariaDB or PostgreSQL).
-- **Redis** for caching & session storage.
-- **Queue worker** to handle asynchronous tasks (like mail).
+This repository provides a Docker-based setup for a small Laravel application, including:
+
+- **PHP-FPM** for running Laravel (optimized for ~10 concurrent processes).
+- **Nginx** as a reverse proxy to PHP-FPM.
+- **MySQL** database (easily switchable to MariaDB or PostgreSQL).
+- **Redis** for caching and session storage.
+- **Queue worker** for handling asynchronous tasks, such as email sending.
 
 ## Prerequisites
 - Docker >= 20
 - Docker Compose >= 1.29
 
-## Usage
+## Installation and Usage
 
 1. **Clone** or **download** this repository.
 
-2. In the project root (where `docker-compose.yml` is), run:
+2. Navigate to the project root (where `docker-compose.yml` is located).
+
+3. Run the following command to start the services:
+
    ```bash
    docker-compose up -d
    ```
 
+4. To access the application container for commands (e.g., migrations, artisan):
+
+   ```bash
    docker exec -it php_app bash
+   ```
 
-3. Run optimisation
-
-```bash
-php artisan optimize
-```
-
-4. Create admin user:
+5. Create admin user:
 
 ```php
 php artisan tinker
 \App\Models\User::create(['name' => 'Admin User', 'email' => 'enter email', 'password' => bcrypt('enter password')]);
-```   
-
-## Useful commands
-
-* How many children have paid?
-
-```php
-DB::table('children')->join('parents','parent_id','parents.id')->where('parents.registration_status','=','completed')->count();
 ```
 
-* How many payments have been made?
-
-```php
-\App\Models\Payment::all()->count();
+6. Run optimisation after deployment
+ 
+```bash
+php artisan optimize
 ```
 
-```sql
-select c.student_number, c.first_name, c.last_name, c.gender, c.day_school_year, c.dhamma_class, c.sinhala_class, p.parent1_email, p.parent2_email from children c, parents p where c.parent_id=p.id order by c.student_number
-```
+## Useful Commands
 
-* parents not registered
+Here are some SQL and PHP snippets for common administrative tasks:
 
-```sql
-select `parent1_first_name`,`parent1_last_name` from parents where `registration_status` != 'completed' order by `parent1_first_name`;
-```
+- **Reset registrations for the new year**:
 
-* whats app list
+  ```sql
+  UPDATE `parents` SET `registration_status` = 'pending';
+  UPDATE `parents` SET `payment_token` = NULL;
+  ```
 
-```sql
-select c.student_number,`parent1_first_name`, `parent1_last_name`, `parent1_email`, `parent1_phone`, `parent2_first_name`, `parent2_last_name`, `parent2_email`, `parent2_phone`, `registration_status` from children c, parents p where c.parent_id=p.id order by c.student_number
-```
+- **Count paid children**:
 
-* registered parents emails
+  ```php
+  DB::table('children')->join('parents', 'parent_id', 'parents.id')->where('parents.registration_status', '=', 'completed')->count();
+  ```
 
-```sql
-select `updated_at`, `parent1_first_name`, `parent1_last_name`, `parent1_email`, `parent2_first_name`, `parent2_last_name`,`parent2_email` from parents where `registration_status` = 'completed' ORDER BY `parents`.`updated_at` DESC
-```
+- **Count total payments**:
 
-* input to student attendance
+  ```php
+  \App\Models\Payment::all()->count();
+  ```
 
-```sql
-select c.student_number, c.first_name, c.last_name, p.registration_status from children c, parents p where c.parent_id=p.id order by c.student_number;
-```
+  Or via SQL:
 
-## Historical Information
+  ```sql
+  SELECT COUNT(*) FROM payments;
+  ```
 
-### Initial Setup
+- **Export student list**:
+
+  ```sql
+  SELECT c.student_number, c.first_name, c.last_name, c.gender, c.day_school_year, c.dhamma_class, c.sinhala_class, p.parent1_email, p.parent2_email
+  FROM children c, parents p
+  WHERE c.parent_id = p.id
+  ORDER BY c.student_number;
+  ```
+
+- **List unregistered parents**:
+
+  ```sql
+  SELECT `parent1_first_name`, `parent1_last_name`
+  FROM parents
+  WHERE `registration_status` != 'completed'
+  ORDER BY `parent1_first_name`;
+  ```
+
+- **WhatsApp contact list**:
+
+  ```sql
+  SELECT c.student_number, `parent1_first_name`, `parent1_last_name`, `parent1_email`, `parent1_phone`, `parent2_first_name`, `parent2_last_name`, `parent2_email`, `parent2_phone`, `registration_status`
+  FROM children c, parents p
+  WHERE c.parent_id = p.id
+  ORDER BY c.student_number;
+  ```
+
+- **Registered parents' emails**:
+
+  ```sql
+  SELECT `updated_at`, `parent1_first_name`, `parent1_last_name`, `parent1_email`, `parent2_first_name`, `parent2_last_name`, `parent2_email`
+  FROM parents
+  WHERE `registration_status` = 'completed'
+  ORDER BY `parents`.`updated_at` DESC;
+  ```
+
+- **Input for student attendance**:
+
+  ```sql
+  SELECT c.student_number, c.first_name, c.last_name, p.registration_status
+  FROM children c, parents p
+  WHERE c.parent_id = p.id
+  ORDER BY c.student_number;
+  ```
+
+## Development Setup
+
+### Initial Setup Commands
+
+These commands were used to initialize the project:
 
 ```bash
 docker run --mount type=bind,src=./,dst=/app composer:2 create-project laravel/laravel school_registration
@@ -120,7 +163,7 @@ docker run --mount type=bind,src=./,dst=/var/www/html php:8-fpm php artisan make
 ```
 
 ## TODO
- 
+
 - Handle cases with 0 children in the UI and backend.
 - Create additional test files (e.g., ChildTest.php, PaymentTest.php, StudentNumberTrackerTest.php) and ensure model factories are set up.
 - Remove DOB field if not needed.
