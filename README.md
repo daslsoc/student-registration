@@ -17,12 +17,26 @@ This repository demonstrates a Docker-based setup for a small Laravel app with:
 ## Usage
 
 1. **Clone** or **download** this repository.
+
 2. In the project root (where `docker-compose.yml` is), run:
    ```bash
    docker-compose up -d
    ```
 
    docker exec -it php_app bash
+
+3. Run optimisation
+
+```bash
+php artisan optimize
+```
+
+4. Create admin user:
+
+```php
+php artisan tinker
+\App\Models\User::create(['name' => 'Admin User', 'email' => 'enter email', 'password' => bcrypt('enter password')]);
+```   
 
 ## Useful commands
 
@@ -105,15 +119,11 @@ docker run --mount type=bind,src=./,dst=/var/www/html php:8-fpm php artisan make
 docker run --mount type=bind,src=./,dst=/var/www/html php:8-fpm php artisan make:migration add_photography_allowed_to_children_table
 ```
 
-== TODO
-(You’d also have ChildTest.php, PaymentTest.php, StudentNumberTrackerTest.php similarly. Make sure you create model factories if you want to use Model::factory()->create(). For brevity, not all are shown here, but the pattern is the same.)
-
-* todo need to deal with 0 children in ui and backend
-
-\App\Models\User::create(['name' => 'Admin User', 'email' => 'dileepa@codiphisolutions.com.au', 'password' => bcrypt('secret123')]);
-
-remove dob
-add postcode
-need to prevent bounce in form
-
-* "yes i want to subscribe" email
+## TODO
+ 
+- Handle cases with 0 children in the UI and backend.
+- Create additional test files (e.g., ChildTest.php, PaymentTest.php, StudentNumberTrackerTest.php) and ensure model factories are set up.
+- Remove DOB field if not needed.
+- Add postcode field.
+- Prevent form bounce issues.
+- Implement "yes, I want to subscribe" email functionality.
