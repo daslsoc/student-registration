@@ -1,0 +1,6 @@
+<?php
+
+return [
+    'single_child' => 100,
+    'multiple_children' => 150,
+];

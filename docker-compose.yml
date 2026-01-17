@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PHP-FPM container
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: php_app
+    volumes:
+      # Mount the entire project so changes are reflected immediately in dev
+      - ./:/var/www/html
+    environment:
+      DB_HOST: db
+      # DB_DATABASE: laravel_db
+      DB_USERNAME: laravel_user
+      DB_PASSWORD: secret
+
+      # Redis-based sessions & queue
+      REDIS_HOST: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    networks:
+      - laravel_net
+
+  # Nginx container
+  nginx:
+    image: nginx:latest
+    container_name: nginx_web
+    depends_on:
+      - app
+    volumes:
+      # Mount code so Nginx can serve static files
+      - ./:/var/www/html
+      # Use custom Nginx config
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - laravel_net
+
+  # MySQL DB
+  db:
+    image: mysql:8
+    container_name: mysql_db
+    environment:
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - laravel_net
+
+  # Redis for caching & queue
+  redis:
+    image: redis:alpine
+    container_name: redis_cache
+    networks:
+      - laravel_net
+
+  # Queue Worker for async tasks
+  queue:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: queue_worker
+    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    depends_on:
+      - app
+      - redis
+    networks:
+      - laravel_net
+
+volumes:
+  db_data:
+
+networks:
+  laravel_net:
+    driver: bridge

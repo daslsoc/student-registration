@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * ParentModel represents a parent/guardian record.
+ *
+ * @property int $id
+ * @property string $parent1_first_name
+ * @property string $parent1_last_name
+ * @property string $parent1_email
+ * ...
+ */
+class ParentModel extends Model
+{
+    use HasFactory;
+
+    protected $table = 'parents';
+
+    protected $fillable = [
+        'parent1_first_name',
+        'parent1_last_name',
+        'parent1_email',
+        'parent1_phone',
+        'parent2_first_name',
+        'parent2_last_name',
+        'parent2_email',
+        'parent2_phone',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'relationship_to_family',
+        'update_token',
+        'token_expires_at',
+        'payment_token',
+        'registration_status',
+        'postcode',
+        'guidelines_accepted',
+    ];
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_COMPLETED = 'completed';    
+
+    /**
+     * Boot the model to log creation/updates/deletions.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::created(function ($model) {
+            Log::info('Parent created', $model->toArray());
+        });
+        static::updated(function ($model) {
+            Log::info('Parent updated', $model->toArray());
+        });
+        static::deleted(function ($model) {
+            Log::info('Parent deleted', $model->toArray());
+        });
+    }
+
+    /**
+     * One parent can have many children.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function children()
+    {
+        return $this->hasMany(Child::class, 'parent_id');
+    }
+
+    /**
+     * One parent can have many payments.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'parent_id');
+    }
+}

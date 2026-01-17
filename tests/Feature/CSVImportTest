@@ -1,0 +1,35 @@
+<?php
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+
+/**
+ * Feature test for CSV importing parents/children.
+ */
+class CSVImportFeatureTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * Test CSV import with sample data.
+     */
+    public function test_can_import_csv()
+    {
+        $csvData = "Parent1FirstName,Parent1LastName,Parent1Email,Parent1Phone,Parent2FirstName,Parent2LastName,Parent2Email,Parent2Phone,EmergencyContactName,EmergencyContactPhone,RelationshipToFamily,Child1FirstName,Child1LastName,Child1Gender,Child1DateOfBirth,Child1ResidencyStatus,Child1DaySchoolName,Child1DaySchoolYear,Child1Allergies,Child1SpecialNeeds,Child1DhammaClass,Child1SinhalaClass\n"
+                 . "John,Doe,john@example.com,123456,,,,'',Jane,789,Aunt,Kiddo,Test,Male,2010-01-01,Citizen,ABC School,5,,,G1,LevelA\n";
+
+        $file = UploadedFile::fake()->createWithContent('parents.csv', $csvData);
+
+        $response = $this->post('/admin/import-csv', [
+            'csv_file' => $file,
+            'default_registration_year' => 2023,
+        ]);
+
+        $response->assertSessionHas('status', 'CSV data has been successfully imported!');
+        $this->assertDatabaseHas('parents', ['parent1_email' => 'john@example.com']);
+        $this->assertDatabaseHas('children', ['first_name' => 'Kiddo']);
+    }
+}
