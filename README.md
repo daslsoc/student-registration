@@ -38,16 +38,16 @@ This repository provides a Docker-based setup for a small Laravel application, i
 
 6. Create admin user:
 
-```php
-php artisan tinker
-\App\Models\User::create(['name' => 'Admin User', 'email' => 'enter email', 'password' => bcrypt('enter password')]);
-```
+    ```php
+    php artisan tinker
+    \App\Models\User::create(['name' => 'Admin User', 'email' => 'enter email', 'password' => bcrypt('enter password')]);
+    ```
 
 7. Run optimisation after deployment
  
-```bash
-php artisan optimize
-```
+    ```bash
+    php artisan optimize
+    ```
 
 ## Useful Commands
 
@@ -76,6 +76,16 @@ Here are some SQL and PHP snippets for common administrative tasks:
 
   ```sql
   SELECT COUNT(*) FROM payments;
+  ```
+
+- **Paid Students**
+
+  ```sql
+  SELECT c.student_number, c.first_name, c.last_name, p.registration_status
+  FROM children c, parents p
+  WHERE c.parent_id = p.id
+  and p.registration_status = "completed"
+  ORDER BY c.student_number;
   ```
 
 - **Export student list**:
@@ -123,6 +133,16 @@ Here are some SQL and PHP snippets for common administrative tasks:
   ORDER BY c.student_number;
   ```
 
+**Export for ACL CLS Grant Program Form**
+```sql
+  SELECT c.student_number, c.last_name, c.first_name, c.gender, c.date_of_birth, c.`residency_status`, c.`day_school_name`, c.`day_school_year`
+  FROM children c, parents p
+  WHERE c.parent_id = p.id
+  and p.registration_status = "completed"
+  ORDER BY c.student_number;
+```
+
+
 ## Development Setup
 
 ### Initial Setup Commands
@@ -169,6 +189,5 @@ docker run --mount type=bind,src=./,dst=/var/www/html php:8-fpm php artisan make
 - Handle cases with 0 children in the UI and backend.
 - Create additional test files (e.g., ChildTest.php, PaymentTest.php, StudentNumberTrackerTest.php) and ensure model factories are set up.
 - Remove DOB field if not needed.
-- Add postcode field.
 - Prevent form bounce issues.
 - Implement "yes, I want to subscribe" email functionality.

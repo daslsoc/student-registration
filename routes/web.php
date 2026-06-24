@@ -37,3 +37,8 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 // In many Laravel apps, it's a POST route for CSRF protection, although some do GET.
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::middleware(['throttle:10,1'])->group(function () {
+    Route::post('/registration', [RegistrationController::class, 'handleRegistration']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
+

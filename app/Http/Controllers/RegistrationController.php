@@ -107,23 +107,15 @@ class RegistrationController extends Controller
     {
         $validated = $this->validateRegistrationData($request);
 
-        $parent = ParentModel::create($request->only([
-            'parent1_first_name',
-            'parent1_last_name',
-            'parent1_email',
-            'parent1_phone',
-            'parent2_first_name',
-            'parent2_last_name',
-            'parent2_email',
-            'parent2_phone',
-            'emergency_contact_name',
-            'emergency_contact_phone',
-            'relationship_to_family',
-            'postcode',
-            'guidelines_accepted',
-            'registration_status' => ParentModel::STATUS_PENDING,
-        ]));
-
+        $data = $request->only([
+            'parent1_first_name', 'parent1_last_name', 'parent1_email', 'parent1_phone',
+            'parent2_first_name', 'parent2_last_name', 'parent2_email', 'parent2_phone',
+            'emergency_contact_name', 'emergency_contact_phone', 'relationship_to_family',
+            'postcode', 'guidelines_accepted'
+        ]);
+        $data['registration_status'] = ParentModel::STATUS_PENDING;
+        $parent = ParentModel::create($data);
+        
         Log::info("New parent registered", $parent->toArray());
 
         foreach ($validated['children'] as $childData) {

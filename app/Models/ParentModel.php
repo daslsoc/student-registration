@@ -41,6 +41,10 @@ class ParentModel extends Model
         'guidelines_accepted',
     ];
 
+    protected $hidden = [
+        'update_token', 'payment_token'
+    ];
+
     public const STATUS_PENDING = 'pending';
     public const STATUS_COMPLETED = 'completed';    
 
