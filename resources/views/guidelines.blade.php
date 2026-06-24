@@ -51,19 +51,22 @@
     <h2 id="timetable">2. School Timetable</h2>
     <ul>
       <li>
-        <p><strong>2.30 &ndash; 3.00 pm:</strong> Observing Pansil</p>
+        <p><strong>2.20 &ndash; 2.30 pm:</strong> Arrive at the temple</p>
       </li>
       <li>
-        <p><strong>3.00 &ndash; 4.00 pm:</strong> Dhamma School</p>
+        <p><strong>2.30 &ndash; 2.50 pm:</strong> Observing Pansil</p>
       </li>
       <li>
-        <p><strong>4.00 &ndash; 4.30 pm:</strong> Interval</p>
+        <p><strong>2.50 &ndash; 3.50 pm:</strong> Dhamma School</p>
       </li>
       <li>
-        <p><strong>4.30 &ndash; 5.30 pm:</strong> Sinhala Language School</p>
+        <p><strong>3.50 &ndash; 4.10 pm:</strong> Interval</p>
       </li>
       <li>
-        <p><strong>5.30 &ndash; 5.45 pm:</strong> National Anthem</p>
+        <p><strong>4.10 &ndash; 5.10 pm:</strong> Sinhala Language School</p>
+      </li>
+      <li>
+        <p><strong>5.10 &ndash; 5.15 pm:</strong> National Anthem</p>
       </li>
     </ul>
     <p><strong>Class Allocation (Based on ACT School Grades)</strong></p>
