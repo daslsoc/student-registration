@@ -194,8 +194,9 @@ class RegistrationController extends Controller
         // 1) Retrieve the token from query string
         $providedToken = $request->query('token');
 
-        // 2) Check if it matches parent->success_token
-        if (!$providedToken || $providedToken !== $parent->payment_token) {
+        // 2) Check if it matches parent->payment_token (constant-time compare)
+        if (!$providedToken || !$parent->payment_token
+            || !hash_equals($parent->payment_token, $providedToken)) {
             // Token is invalid or empty => skip payment creation
             Log::warning("Tried to access the successful payment URL again");
 
@@ -270,7 +271,8 @@ class RegistrationController extends Controller
             ['token' => $token]
         );
 
-        Log::info("Update link generated for parent_id={$parent->id}", ['url' => $url]);
+        // Do NOT log $url — it embeds the single-use update token.
+        Log::info("Update link generated for parent_id={$parent->id}");
 
         Mail::to($parent->parent1_email)->send(new UpdateRegistrationLink($url));
         if ($parent->parent2_email) {
