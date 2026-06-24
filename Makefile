@@ -1,0 +1,177 @@
+# Student Registration development tasks.
+#
+# All commands orchestrate docker-compose so the right containers are up
+# before running tests / artisan / composer. PHP tooling runs inside the
+# `app` container (PHP 8.2 + Xdebug); JavaScript (Vitest) runs on the host
+# (Node), since the PHP image carries no Node. Dusk drives a Selenium
+# container via the docker-compose.dusk.yml override.
+#
+# Run `make` (no target) or `make help` to see all targets.
+
+.DEFAULT_GOAL := help
+
+DC       := docker compose
+DC_DUSK  := docker compose -f docker-compose.yml -f docker-compose.dusk.yml
+# Plain app one-off (used for composer/artisan). Xdebug off keeps it snappy.
+APP      := $(DC) run --rm -e XDEBUG_MODE=off app
+# Coverage needs the Xdebug coverage driver (baked into the image).
+APP_COV  := $(DC) run --rm -e XDEBUG_MODE=coverage app
+
+.PHONY: help
+help: ## Show available targets
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+## --- one-time setup ---
+
+.PHONY: build
+build: ## Rebuild every image (run once after pulling)
+	$(DC) build
+
+.PHONY: install
+install: ## Install PHP (in container) + JS (host) dependencies, with dev deps
+	$(APP) composer install --no-interaction
+	npm install
+
+.PHONY: db-up
+db-up: ## Bring up MySQL and wait until it accepts connections
+	@$(DC) up -d db >/dev/null
+	@echo "Waiting for MySQL..."
+	@for i in $$(seq 1 30); do \
+		$(DC) exec -T db sh -c 'mysqladmin ping -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent' >/dev/null 2>&1 && exit 0; \
+		sleep 1; \
+	done; \
+	echo "MySQL did not become ready" >&2; exit 1
+
+.PHONY: db-setup
+db-setup: db-up ## Create + migrate the student_reg_test and student_reg_dusk databases
+	$(DC) exec -T db sh -c 'mysql -uroot -p"$$MYSQL_ROOT_PASSWORD" -e "\
+		CREATE DATABASE IF NOT EXISTS student_reg_test; \
+		CREATE DATABASE IF NOT EXISTS student_reg_dusk; \
+		GRANT ALL PRIVILEGES ON student_reg_test.* TO \"laravel_user\"@\"%\"; \
+		GRANT ALL PRIVILEGES ON student_reg_dusk.* TO \"laravel_user\"@\"%\"; \
+		FLUSH PRIVILEGES;"'
+	$(APP) sh -c 'DB_CONNECTION=mysql DB_HOST=db DB_PORT=3306 DB_DATABASE=student_reg_test DB_USERNAME=root DB_PASSWORD=secret php artisan migrate --force'
+	$(APP) sh -c 'DB_CONNECTION=mysql DB_HOST=db DB_PORT=3306 DB_DATABASE=student_reg_dusk DB_USERNAME=root DB_PASSWORD=secret php artisan migrate --force'
+
+## --- tests ---
+
+.PHONY: test
+test: db-up ## Run Unit + Feature (PHPUnit) against student_reg_test
+	$(APP) composer test
+
+.PHONY: test-unit
+test-unit: db-up ## Run only the Unit suite
+	$(APP) vendor/bin/phpunit --testsuite Unit
+
+.PHONY: test-feature
+test-feature: db-up ## Run only the Feature suite
+	$(APP) vendor/bin/phpunit --testsuite Feature
+
+.PHONY: test-dusk
+test-dusk: dusk-up ## Run Dusk (browser) tests against student_reg_dusk, then restore
+	$(DC_DUSK) run --rm app php artisan dusk; status=$$?; $(MAKE) dusk-down; exit $$status
+
+.PHONY: test-all
+test-all: test test-dusk ## Run PHPUnit + Dusk back-to-back
+
+.PHONY: coverage
+coverage: db-up ## Run PHPUnit with HTML coverage. Opens tests/coverage/index.html.
+	$(APP_COV) vendor/bin/phpunit --coverage-html tests/coverage
+	@echo ""
+	@echo "Coverage report: file://$(PWD)/tests/coverage/index.html"
+
+.PHONY: js-test
+js-test: ## Run JS (Vitest) tests against tests/js/
+	npm run test
+
+.PHONY: js-test-watch
+js-test-watch: ## Run Vitest in watch mode
+	npm run test:watch
+
+.PHONY: js-coverage
+js-coverage: ## Run Vitest with v8 HTML coverage. Opens tests/js-coverage/index.html.
+	npm run test:coverage
+	@echo ""
+	@echo "JS coverage report: file://$(PWD)/tests/js-coverage/index.html"
+
+.PHONY: coverage-all
+coverage-all: coverage js-coverage ## Run both PHP and JS coverage back-to-back
+
+## --- lint / format ---
+#
+# Pint pins the `laravel` preset (pint.json) so app code is formatted the
+# same way the framework itself is. Use `make lint` in CI / pre-push to catch
+# drift; `make lint-fix` locally to apply.
+
+.PHONY: lint
+lint: ## Check PHP style (Laravel Pint, laravel preset). Read-only — fails on diffs.
+	$(APP) vendor/bin/pint --test
+
+.PHONY: lint-fix
+lint-fix: ## Apply Laravel Pint fixes to PHP files
+	$(APP) vendor/bin/pint
+
+## --- dusk stack control ---
+
+.PHONY: dusk-up
+dusk-up: ## Bring up app/nginx/db/selenium with the Dusk DB override
+	$(DC_DUSK) up -d db nginx app selenium
+	@# php-fpm serves as www-data, but the mounted storage is host-owned —
+	@# make it writable so file sessions/cache/compiled views work.
+	$(DC_DUSK) exec -T -u root app chown -R www-data:www-data storage bootstrap/cache
+
+.PHONY: dusk-down
+dusk-down: ## Restore app to the normal dev DB (after a Dusk run)
+	$(DC) up -d app
+
+## --- shortcuts ---
+
+.PHONY: dusk
+dusk: ## Pass args to dusk, e.g. `make dusk ARGS="tests/Browser/RegistrationBrowserTest.php"` (needs dusk-up)
+	$(DC_DUSK) run --rm app php artisan dusk $(ARGS)
+
+.PHONY: phpunit
+phpunit: db-up ## Pass arbitrary args to phpunit, e.g. `make phpunit ARGS="--filter test_login"`
+	$(APP) vendor/bin/phpunit $(ARGS)
+
+.PHONY: artisan
+artisan: ## Run artisan, e.g. `make artisan ARGS="migrate:status"`
+	$(APP) php artisan $(ARGS)
+
+.PHONY: composer
+composer: ## Run composer, e.g. `make composer ARGS="require foo/bar"`
+	$(APP) composer $(ARGS)
+
+.PHONY: npm
+npm: ## Run npm on the host, e.g. `make npm ARGS="install"`
+	npm $(ARGS)
+
+.PHONY: assets
+assets: ## Build production JS/CSS assets (Vite)
+	npm run build
+
+.PHONY: shell
+shell: ## Open a shell in the app container
+	$(APP) sh
+
+## --- stack control ---
+
+.PHONY: up
+up: ## Bring up the full dev stack
+	$(DC) up -d
+
+.PHONY: down
+down: ## Stop everything
+	$(DC) down
+
+.PHONY: ps
+ps: ## Show service status
+	$(DC) ps
+
+.PHONY: logs
+logs: ## Tail logs (all services, or pass SERVICE=app for one)
+	$(DC) logs -f $(SERVICE)
+
+.PHONY: mysql
+mysql: ## Open mysql client. Defaults to laravel_db; override with DB=student_reg_test
+	$(DC) exec db sh -c 'mysql -uroot -p"$$MYSQL_ROOT_PASSWORD" $(or $(DB),laravel_db)'
