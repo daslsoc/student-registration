@@ -25,8 +25,6 @@ class JoinWhatsAppGroup extends Mailable implements ShouldQueue
 
     /**
      * Create a new message instance.
-     *
-     * @param ParentModel $parent
      */
     public function __construct(ParentModel $parent)
     {
@@ -42,6 +40,6 @@ class JoinWhatsAppGroup extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->subject('Join Our Official WhatsApp Group for Updates')
-                    ->view('emails.join_whatsapp_group');
+            ->view('emails.join_whatsapp_group');
     }
 }

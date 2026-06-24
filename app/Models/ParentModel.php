@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  * @property string $parent1_first_name
  * @property string $parent1_last_name
  * @property string $parent1_email
- * ...
+ *                                 ...
  */
 class ParentModel extends Model
 {
@@ -42,11 +43,12 @@ class ParentModel extends Model
     ];
 
     protected $hidden = [
-        'update_token', 'payment_token'
+        'update_token', 'payment_token',
     ];
 
     public const STATUS_PENDING = 'pending';
-    public const STATUS_COMPLETED = 'completed';    
+
+    public const STATUS_COMPLETED = 'completed';
 
     /**
      * Boot the model to log creation/updates/deletions.
@@ -69,7 +71,7 @@ class ParentModel extends Model
     /**
      * One parent can have many children.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function children()
     {
@@ -79,7 +81,7 @@ class ParentModel extends Model
     /**
      * One parent can have many payments.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function payments()
     {

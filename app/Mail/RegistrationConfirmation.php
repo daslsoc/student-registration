@@ -25,8 +25,6 @@ class RegistrationConfirmation extends Mailable implements ShouldQueue
 
     /**
      * Create a new message instance.
-     *
-     * @param ParentModel $parent
      */
     public function __construct(ParentModel $parent)
     {
@@ -42,6 +40,6 @@ class RegistrationConfirmation extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->subject('School Registration Confirmation')
-                    ->view('emails.registration_confirmation');
+            ->view('emails.registration_confirmation');
     }
 }

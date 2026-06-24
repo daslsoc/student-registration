@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 /**
  * Class AuthController
@@ -16,7 +18,7 @@ class AuthController extends Controller
     /**
      * Show the login form.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showLoginForm()
     {
@@ -26,8 +28,7 @@ class AuthController extends Controller
     /**
      * Process the login submission.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function login(Request $request)
     {
@@ -43,8 +44,9 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             // If successful, regenerate session for security
             $request->session()->regenerate();
+
             return redirect()->intended('/admin/parents-students')
-                             ->with('status', 'You are now logged in!');
+                ->with('status', 'You are now logged in!');
         }
 
         // If login fails, redirect back with an error
@@ -56,8 +58,7 @@ class AuthController extends Controller
     /**
      * Logs the user out and invalidates the session.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function logout(Request $request)
     {

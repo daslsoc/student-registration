@@ -25,7 +25,7 @@ class UpdateRegistrationLink extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      *
-     * @param string $url
+     * @param  string  $url
      */
     public function __construct($url)
     {
@@ -41,6 +41,6 @@ class UpdateRegistrationLink extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->subject('Update Your Registration')
-                    ->view('emails.update_link');
+            ->view('emails.update_link');
     }
 }

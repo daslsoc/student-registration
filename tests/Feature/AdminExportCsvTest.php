@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\ParentModel;
 use App\Models\Child;
+use App\Models\ParentModel;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Class AdminExportCsvTest
@@ -95,7 +94,7 @@ class AdminExportCsvTest extends TestCase
 
         // Assuming CSV has headers even if empty
         $this->assertStringContainsString('Parent1FirstName', $csvContent);
-        
+
         // No data rows
         $this->assertStringNotContainsString('John', $csvContent);
     }
@@ -128,7 +127,7 @@ class AdminExportCsvTest extends TestCase
         $response = $this->get('/admin/export-csv');
 
         $response->assertStatus(200);
-        
+
         // capture streamed response body
         ob_start();
         $response->baseResponse->send();
@@ -170,7 +169,7 @@ class AdminExportCsvTest extends TestCase
         $response = $this->get('/admin/export-csv');
 
         $response->assertStatus(200);
-        
+
         // capture streamed response body
         ob_start();
         $response->baseResponse->send();

@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\ParentModel;
 use App\Models\Child;
-use App\Models\User;
+use App\Models\ParentModel;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Class UpdateRegistrationFeatureTest
@@ -64,7 +63,7 @@ class UpdateRegistrationFeatureTest extends TestCase
             'token_expires_at' => Carbon::now()->addHours(2),
         ]);
 
-        $response = $this->get('/registration/update/' . $parent->update_token);
+        $response = $this->get('/registration/update/'.$parent->update_token);
 
         $response->assertStatus(200);
         $response->assertSee('Update Registration Details');
@@ -75,7 +74,6 @@ class UpdateRegistrationFeatureTest extends TestCase
      *
      * @return void
      */
-
     public function test_can_update_existing_registration()
     {
         $parent = ParentModel::factory()->create([
@@ -84,7 +82,7 @@ class UpdateRegistrationFeatureTest extends TestCase
         ]);
         $child = Child::factory()->create(['parent_id' => $parent->id]);
 
-        $response = $this->post('/registration/update/' . $parent->update_token, [
+        $response = $this->post('/registration/update/'.$parent->update_token, [
             'parent1_first_name' => 'UpdatedFirst',
             'parent1_last_name' => 'UpdatedLast',
             'parent1_email' => $parent->parent1_email,

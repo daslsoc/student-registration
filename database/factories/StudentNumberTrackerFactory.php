@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\StudentNumberTracker;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StudentNumberTracker>
+ * @extends Factory<StudentNumberTracker>
  */
 class StudentNumberTrackerFactory extends Factory
 {

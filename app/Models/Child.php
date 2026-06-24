@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  * @property int $id
  * @property int $parent_id
  * @property string $first_name
- * ...
+ *                              ...
  */
 class Child extends Model
 {
@@ -58,7 +59,7 @@ class Child extends Model
     /**
      * Child belongs to one parent.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function parent()
     {
@@ -68,5 +69,5 @@ class Child extends Model
     public function age()
     {
         return Carbon::parse($this->attributes['date_of_birth'])->age;
-    }    
+    }
 }

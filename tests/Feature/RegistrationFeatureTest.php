@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
-use App\Models\ParentModel;
 use App\Models\Child;
+use App\Models\ParentModel;
 use App\Models\Payment;
 use App\Models\StudentNumberTracker;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 /**
  * Class RegistrationFeatureTest
@@ -161,7 +161,7 @@ class RegistrationFeatureTest extends TestCase
         $parent->update(['payment_token' => $paymentToken]);
 
         // Simulate Stripe success callback with ?amount=100
-        $response = $this->get('/registration/success/' . $parent->id . '?amount=100.00' . '&token='. $paymentToken);
+        $response = $this->get('/registration/success/'.$parent->id.'?amount=100.00'.'&token='.$paymentToken);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('payments', [

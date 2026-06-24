@@ -3,23 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Mail\JoinWhatsAppGroup;
-use App\Models\ParentModel;
-use App\Models\Child;
-use App\Models\Payment;
-use App\Models\StudentNumberTracker;
 use App\Mail\RegistrationConfirmation;
 use App\Mail\UpdateRegistrationLink;
+use App\Models\Child;
+use App\Models\ParentModel;
+use App\Models\Payment;
+use App\Models\StudentNumberTracker;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
-use Carbon\Carbon;
-use Stripe\Stripe;
-use Stripe\Checkout\Session;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use Stripe\Checkout\Session;
+use Stripe\Stripe;
 
 /**
  * Handles school registration logic: new signups, updates, CSV import, Stripe payments.
@@ -29,12 +31,12 @@ class RegistrationController extends Controller
     /**
      * Validate the incoming request for registration data.
      *
-     * @param Request $request
      * @return array
      */
     private function validateRegistrationData(Request $request)
     {
         Log::info('Validating registration data');
+
         return $request->validate([
             'parent1_first_name' => 'required|string|min:2|max:50',
             'parent1_last_name' => 'required|string|min:2|max:50',
@@ -57,7 +59,7 @@ class RegistrationController extends Controller
             'children.*.date_of_birth' => [
                 'required',
                 'date_format:Y-m-d',
-                'before:' . Carbon::now()->subYears(config('custom.school.minimum_child_age'))->format('Y-m-d')
+                'before:'.Carbon::now()->subYears(config('custom.school.minimum_child_age'))->format('Y-m-d'),
             ],
             'children.*.residency_status' => 'required|string|in:Temporary Resident,Permanent Resident,Citizen',
             'children.*.day_school_name' => 'required|string|max:255',
@@ -66,7 +68,7 @@ class RegistrationController extends Controller
             'children.*.special_needs' => 'nullable|string',
             'children.*.dhamma_class' => 'required|string|in:Did not attend last year,Class 1 (A),Class 1 (B),Class 2 (C),Class 3 (D),Class 4 (E)',
             'children.*.sinhala_class' => 'required|string|in:Did not attend last year,Class 1 (A),Class 1 (B),Class 2 (C),Class 3 (D),Class 4 (E)',
-            'children.*.year_of_first_registration' => 'nullable|integer|min:1991|max:' . now()->year,
+            'children.*.year_of_first_registration' => 'nullable|integer|min:1991|max:'.now()->year,
             'children.*.photography_allowed' => 'accepted|sometimes',
         ]);
     }
@@ -90,7 +92,7 @@ class RegistrationController extends Controller
     /**
      * Show the school registration form for a new parent/child record.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showRegistrationForm()
     {
@@ -100,8 +102,7 @@ class RegistrationController extends Controller
     /**
      * Handle new registrations, saving the parent, children, and redirect to Stripe.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function handleRegistration(Request $request)
     {
@@ -111,12 +112,12 @@ class RegistrationController extends Controller
             'parent1_first_name', 'parent1_last_name', 'parent1_email', 'parent1_phone',
             'parent2_first_name', 'parent2_last_name', 'parent2_email', 'parent2_phone',
             'emergency_contact_name', 'emergency_contact_phone', 'relationship_to_family',
-            'postcode', 'guidelines_accepted'
+            'postcode', 'guidelines_accepted',
         ]);
         $data['registration_status'] = ParentModel::STATUS_PENDING;
         $parent = ParentModel::create($data);
-        
-        Log::info("New parent registered", $parent->toArray());
+
+        Log::info('New parent registered', $parent->toArray());
 
         foreach ($validated['children'] as $childData) {
             $childData['student_number'] = $this->assignStudentNumber();
@@ -132,14 +133,14 @@ class RegistrationController extends Controller
             : config('custom.pricing.single_child');
 
         $stripeSession = $this->createStripeSession($parent, $price);
+
         return redirect($stripeSession->url);
     }
 
     /**
      * Create Stripe checkout session.
      *
-     * @param ParentModel $parent
-     * @param int|float   $price
+     * @param  int|float  $price
      * @return Session
      */
     public function createStripeSession(ParentModel $parent, $price)
@@ -152,7 +153,7 @@ class RegistrationController extends Controller
 
         // 3) Build the success URL with the token
         // e.g., /registration/success/{parentId}?token=<the-random-string>
-        $successUrl = route('registration.success', ['parent' => $parent->id]) . '?token=' . $paymentToken . '&amount=' . $price;
+        $successUrl = route('registration.success', ['parent' => $parent->id]).'?token='.$paymentToken.'&amount='.$price;
 
         // 4) Set your Stripe API key
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -183,8 +184,7 @@ class RegistrationController extends Controller
     /**
      * Once Stripe payment is successful, record payment, send email, show success page.
      *
-     * @param Request $request
-     * @param int     $parentId
+     * @param  int  $parentId
      * @return \Illuminate\Contracts\View\View
      */
     public function handleSuccess(Request $request, $parentId)
@@ -195,10 +195,10 @@ class RegistrationController extends Controller
         $providedToken = $request->query('token');
 
         // 2) Check if it matches parent->payment_token (constant-time compare)
-        if (!$providedToken || !$parent->payment_token
-            || !hash_equals($parent->payment_token, $providedToken)) {
+        if (! $providedToken || ! $parent->payment_token
+            || ! hash_equals($parent->payment_token, $providedToken)) {
             // Token is invalid or empty => skip payment creation
-            Log::warning("Tried to access the successful payment URL again");
+            Log::warning('Tried to access the successful payment URL again');
 
             return redirect()->route('registration.form')
                 ->withErrors(['msg' => 'Payment already recorded or not valid.']);
@@ -213,7 +213,7 @@ class RegistrationController extends Controller
 
         // 4) Mark as completed
         $parent->update(['registration_status' => ParentModel::STATUS_COMPLETED]);
-        Log::info("Payment recorded", $payment->toArray());
+        Log::info('Payment recorded', $payment->toArray());
 
         // 5) Clear the token so it’s single-use
         $parent->update(['payment_token' => null]);
@@ -233,7 +233,7 @@ class RegistrationController extends Controller
     /**
      * Show the form for retrieving existing registration via parent email.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showRetrieveDetailsForm()
     {
@@ -243,8 +243,7 @@ class RegistrationController extends Controller
     /**
      * Send an update link to either parent's email for re-registration or updates.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function sendUpdateLink(Request $request)
     {
@@ -285,9 +284,8 @@ class RegistrationController extends Controller
     /**
      * Show the update form once the user clicks on the unique link.
      *
-     * @param Request $request
-     * @param string  $token
-     * @return \Illuminate\View\View
+     * @param  string  $token
+     * @return View
      */
     public function showUpdateForm(Request $request, $token)
     {
@@ -305,9 +303,8 @@ class RegistrationController extends Controller
     /**
      * Handle update of existing registration, possibly with new children, then pay again.
      *
-     * @param Request $request
-     * @param string  $token
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  string  $token
+     * @return RedirectResponse
      */
     public function handleUpdate(Request $request, $token)
     {
@@ -337,7 +334,7 @@ class RegistrationController extends Controller
             'guidelines_accepted',
         ]));
 
-        Log::info("Parent updated via update form", $parent->toArray());
+        Log::info('Parent updated via update form', $parent->toArray());
 
         $existingChildren = $parent->children()->get();
         $existingChildIds = $existingChildren->pluck('id')->toArray();
@@ -349,12 +346,12 @@ class RegistrationController extends Controller
                 $child = Child::find($childData['id']);
 
                 // Ensure photography_allowed is set to false if not present
-                if(!isset($childData['photography_allowed'])){
+                if (! isset($childData['photography_allowed'])) {
                     $childData['photography_allowed'] = '';
                 }
 
                 $child->update($childData);
-                Log::info("Child updated", $child->toArray());
+                Log::info('Child updated', $child->toArray());
             } else {
                 $childData['student_number'] = $this->assignStudentNumber();
                 $childData['year_of_first_registration'] = now()->year;
@@ -367,7 +364,7 @@ class RegistrationController extends Controller
 
         // Delete removed children
         foreach ($existingChildren as $child) {
-            if (!in_array($child->id, $updatedChildIds)) {
+            if (! in_array($child->id, $updatedChildIds)) {
                 $child->delete();
             }
         }
@@ -379,6 +376,7 @@ class RegistrationController extends Controller
                 : config('custom.pricing.single_child');
 
             $stripeSession = $this->createStripeSession($parent, $price);
+
             return redirect($stripeSession->url);
         } else {
             return back()->with('status', 'Details Updates');
@@ -388,7 +386,7 @@ class RegistrationController extends Controller
     /**
      * Show CSV import form for admin.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showImportCsvForm()
     {
@@ -398,14 +396,13 @@ class RegistrationController extends Controller
     /**
      * Handle CSV import of parent and up to 4 children columns.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function handleCsvImport(Request $request)
     {
         $request->validate([
             'csv_file' => 'required|file|mimes:csv,txt',
-            'default_registration_year' => 'required|integer|min:1900|max:' . now()->year,
+            'default_registration_year' => 'required|integer|min:1900|max:'.now()->year,
         ]);
 
         $path = $request->file('csv_file')->getRealPath();
@@ -431,10 +428,10 @@ class RegistrationController extends Controller
                 'guidelines_accepted' => false,
             ]);
 
-            Log::info("CSV Import: Parent created", $parent->toArray());
+            Log::info('CSV Import: Parent created', $parent->toArray());
 
             for ($i = 1; $i <= 4; $i++) {
-                if (!empty($record["Child{$i}FirstName"])) {
+                if (! empty($record["Child{$i}FirstName"])) {
                     $childData = [
                         'first_name' => $record["Child{$i}FirstName"],
                         'last_name' => $record["Child{$i}LastName"],
@@ -453,7 +450,7 @@ class RegistrationController extends Controller
                     ];
                     $child = $parent->children()->create($childData);
 
-                    Log::info("CSV Import: Child created", $child->toArray());
+                    Log::info('CSV Import: Child created', $child->toArray());
                 }
             }
         }

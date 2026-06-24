@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\RegistrationController;
+use Illuminate\Support\Facades\Route;
 
 // Public
 Route::get('/', [HomeController::class, 'home']);
@@ -40,4 +40,3 @@ Route::post('/login', [AuthController::class, 'login'])
 // Process logout (POST).
 // In many Laravel apps, it's a POST route for CSRF protection, although some do GET.
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-

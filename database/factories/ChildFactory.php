@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Child;
 use App\Models\ParentModel;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Class ChildFactory

@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
 class HomeController extends Controller
 {
     public function home()
@@ -15,6 +12,5 @@ class HomeController extends Controller
     public function guidelines()
     {
         return view('guidelines');
-    }    
-    
+    }
 }

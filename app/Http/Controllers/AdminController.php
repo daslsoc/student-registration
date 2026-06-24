@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ParentModel;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 /**
  * Class AdminController
@@ -15,41 +16,43 @@ class AdminController extends Controller
     /**
      * Show all parents & children in a list (DataTables or plain HTML).
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showParentStudentList()
     {
         $parents = ParentModel::with('children')->get();
-        Log::info("Admin viewing parent & child list");
+        Log::info('Admin viewing parent & child list');
+
         return view('admin.parent_child_list', compact('parents'));
     }
 
     public function showOrientationList()
     {
         $parents = ParentModel::with('children')->get();
-        Log::info("Admin viewing orientation list");
+        Log::info('Admin viewing orientation list');
+
         return view('admin.orientation_list', compact('parents'));
-    }    
+    }
 
     public function exportCsv()
     {
         $parents = ParentModel::with('children')->get();
 
         $columns = [
-            'Parent1FirstName','Parent1LastName','Parent1Email','Parent1Phone',
-            'Parent2FirstName','Parent2LastName','Parent2Email','Parent2Phone',
-            'EmergencyContact','EmergencyPhone','Relationship','ChildFirstName',
-            'ChildLastName','DOB','Residency','SchoolName','SchoolYear','Allergies',
-            'SpecialNeeds','DhammaClass','SinhalaClass'
+            'Parent1FirstName', 'Parent1LastName', 'Parent1Email', 'Parent1Phone',
+            'Parent2FirstName', 'Parent2LastName', 'Parent2Email', 'Parent2Phone',
+            'EmergencyContact', 'EmergencyPhone', 'Relationship', 'ChildFirstName',
+            'ChildLastName', 'DOB', 'Residency', 'SchoolName', 'SchoolYear', 'Allergies',
+            'SpecialNeeds', 'DhammaClass', 'SinhalaClass',
         ];
 
-        $callback = function() use ($parents, $columns) {
+        $callback = function () use ($parents, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
-            foreach($parents as $parent) {
+            foreach ($parents as $parent) {
                 // For each child in children
-                foreach($parent->children as $child) {
+                foreach ($parent->children as $child) {
                     $row = [
                         $parent->parent1_first_name,
                         $parent->parent1_last_name,
@@ -71,7 +74,7 @@ class AdminController extends Controller
                         $child->allergies,
                         $child->special_needs,
                         $child->dhamma_class,
-                        $child->sinhala_class
+                        $child->sinhala_class,
                     ];
                     fputcsv($file, $row);
                 }
@@ -82,5 +85,4 @@ class AdminController extends Controller
 
         return response()->streamDownload($callback, 'parents_children.csv');
     }
-
 }
