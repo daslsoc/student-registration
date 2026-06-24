@@ -3,6 +3,7 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         cacheDirectory=".phpunit.cache"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -18,16 +19,46 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_STORE" value="array"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
+        <!--
+            IMPORTANT: these MUST be <server> tags with force="true".
+            PHPUnit 11 writes <env> values into $_ENV but NOT $_SERVER, and
+            Laravel's Dotenv repository reads $_SERVER before $_ENV. So plain
+            <env> overrides are ignored by Laravel and the test process falls
+            back to the .env / container DB_DATABASE -> the DEV database, which
+            RefreshDatabase then wipes. force="true" on a <server> tag is the
+            guard rail that pins every run to the dedicated test database.
+        -->
+        <server name="APP_ENV" value="testing" force="true"/>
+        <server name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
+        <server name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <server name="CACHE_STORE" value="array" force="true"/>
+        <server name="MAIL_MAILER" value="array" force="true"/>
+        <server name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <server name="SESSION_DRIVER" value="array" force="true"/>
+        <server name="PULSE_ENABLED" value="false" force="true"/>
+        <server name="TELESCOPE_ENABLED" value="false" force="true"/>
+
+        <!-- Guard rail: pin the connection + database so a stray run can never
+             touch laravel_db (dev). DB_DATABASE is the critical one. -->
+        <server name="DB_CONNECTION" value="mysql" force="true"/>
+        <server name="DB_DATABASE" value="student_reg_test" force="true"/>
+
+        <!-- Connection coordinates are unforced defaults: the dev container
+             already exports DB_HOST/DB_USERNAME/DB_PASSWORD, and CI overrides
+             them via the workflow's step env. They must NOT be forced. -->
+        <server name="DB_HOST" value="db"/>
+        <server name="DB_PORT" value="3306"/>
+        <server name="DB_USERNAME" value="root"/>
+        <server name="DB_PASSWORD" value="secret"/>
+
+        <!-- Custom app config pinned so config('custom.*') resolves
+             deterministically under test (pricing + minimum age are read by
+             RegistrationController validation and the Stripe amount). -->
+        <server name="SCHOOL_NAME" value="Test School" force="true"/>
+        <server name="SCHOOL_EMAIL" value="school@example.test" force="true"/>
+        <server name="MINIMUM_CHILD_AGE" value="4" force="true"/>
+        <server name="SINGLE_CHILD_COST" value="100" force="true"/>
+        <server name="MULTIPLE_CHILDREN_COST" value="150" force="true"/>
+        <server name="WHATSAPP_JOIN_URL" value="https://example.test/whatsapp" force="true"/>
     </php>
 </phpunit>

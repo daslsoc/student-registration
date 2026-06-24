@@ -25,6 +25,10 @@ xdebug.start_with_request=yes\n\
 # Copy custom FPM config
 COPY docker/fpm-pool.conf /usr/local/etc/php-fpm.d/zzz-pool.conf
 
+# Install Composer globally (matches the container's PHP 8.2 runtime so
+# `make install` / `make test` resolve dependencies against the real platform).
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
 WORKDIR /var/www/html
 
 # Copy Laravel source
@@ -32,8 +36,7 @@ COPY . .
 
 # Copy composer files, then install
 COPY composer.json composer.lock ./
-RUN curl -sS https://getcomposer.org/installer | php && \
-    php composer.phar install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set correct permissions
 RUN chown -R www-data:www-data storage bootstrap/cache

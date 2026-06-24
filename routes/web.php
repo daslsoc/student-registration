@@ -10,7 +10,9 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'home']);
 Route::get('/guidelines', [HomeController::class, 'guidelines'])->name('guidelines');
 Route::get('/registration', [RegistrationController::class, 'showRegistrationForm'])->name('registration.form');
-Route::post('/registration', [RegistrationController::class, 'handleRegistration'])->name('registration.submit');
+Route::post('/registration', [RegistrationController::class, 'handleRegistration'])
+    ->middleware('throttle:10,1')
+    ->name('registration.submit');
 Route::get('/registration/success/{parent}', [RegistrationController::class, 'handleSuccess'])->name('registration.success');
 
 Route::get('/registration/retrieve', [RegistrationController::class, 'showRetrieveDetailsForm'])->name('registration.retrieve');
@@ -30,15 +32,12 @@ Route::middleware('auth')->group(function () {
 // Show the login form (GET)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 
-// Process login submission (POST)
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+// Process login submission (POST). Throttled to slow credential stuffing.
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:10,1')
+    ->name('login.submit');
 
-// Process logout (POST). 
+// Process logout (POST).
 // In many Laravel apps, it's a POST route for CSRF protection, although some do GET.
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::middleware(['throttle:10,1'])->group(function () {
-    Route::post('/registration', [RegistrationController::class, 'handleRegistration']);
-    Route::post('/login', [AuthController::class, 'login']);
-});
 

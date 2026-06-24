@@ -7,7 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "laravel/framework": "^11.31",
+        "laravel/framework": "^12.0",
         "laravel/tinker": "^2.9",
         "league/csv": "^9.21",
         "stripe/stripe-php": "^16.4"
@@ -53,6 +53,12 @@
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
+        ],
+        "test": "vendor/bin/phpunit",
+        "test:dusk": "@php artisan dusk",
+        "test:all": [
+            "@test",
+            "@test:dusk"
         ]
     },
     "extra": {
