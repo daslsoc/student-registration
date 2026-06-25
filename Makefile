@@ -94,6 +94,10 @@ js-coverage: ## Run Vitest with v8 HTML coverage. Opens tests/js-coverage/index.
 	@echo ""
 	@echo "JS coverage report: file://$(PWD)/tests/js-coverage/index.html"
 
+.PHONY: dusk-coverage
+dusk-coverage: ## Surrogate Dusk coverage — % of app GET routes visited + dusk="..." selectors targeted, with gap lists.
+	$(APP) php scripts/dusk-coverage.php
+
 .PHONY: coverage-all
 coverage-all: coverage js-coverage ## Run both PHP and JS coverage back-to-back
 

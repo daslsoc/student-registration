@@ -46,6 +46,7 @@ drives a Selenium container.
 | JS tests (Vitest) | `make js-test` |
 | JS coverage (HTML) | `make js-coverage` → `tests/js-coverage/index.html` |
 | Browser tests (Dusk) | `make test-dusk` |
+| Dusk coverage (which pages are untested) | `make dusk-coverage` |
 | Everything | `make test-all` |
 | Lint (Pint, read-only) | `make lint` |
 | Auto-format (Pint) | `make lint-fix` |
