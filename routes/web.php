@@ -16,7 +16,9 @@ Route::post('/registration', [RegistrationController::class, 'handleRegistration
 Route::get('/registration/success/{parent}', [RegistrationController::class, 'handleSuccess'])->name('registration.success');
 
 Route::get('/registration/retrieve', [RegistrationController::class, 'showRetrieveDetailsForm'])->name('registration.retrieve');
-Route::post('/registration/retrieve', [RegistrationController::class, 'sendUpdateLink'])->name('registration.retrieve.send');
+Route::post('/registration/retrieve', [RegistrationController::class, 'sendUpdateLink'])
+    ->middleware('throttle:5,1') // sends email; throttle to limit abuse / enumeration
+    ->name('registration.retrieve.send');
 Route::get('/registration/update/{token}', [RegistrationController::class, 'showUpdateForm'])->name('registration.update');
 Route::post('/registration/update/{token}', [RegistrationController::class, 'handleUpdate'])->name('registration.update.submit');
 

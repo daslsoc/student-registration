@@ -45,14 +45,15 @@ class Child extends Model
      */
     protected static function booted()
     {
+        // Log identifiers only — child names/DOB/allergies are PII.
         static::created(function ($model) {
-            Log::info('Child created', $model->toArray());
+            Log::info('Child created', ['id' => $model->id, 'parent_id' => $model->parent_id, 'student_number' => $model->student_number]);
         });
         static::updated(function ($model) {
-            Log::info('Child updated', $model->toArray());
+            Log::info('Child updated', ['id' => $model->id, 'parent_id' => $model->parent_id, 'student_number' => $model->student_number]);
         });
         static::deleted(function ($model) {
-            Log::info('Child deleted', $model->toArray());
+            Log::info('Child deleted', ['id' => $model->id, 'parent_id' => $model->parent_id]);
         });
     }
 

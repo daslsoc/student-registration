@@ -57,14 +57,16 @@ class ParentModel extends Model
      */
     protected static function booted()
     {
+        // Log identifiers only — never the full record (names/emails/phones
+        // are PII and tokens are sensitive).
         static::created(function ($model) {
-            Log::info('Parent created', $model->toArray());
+            Log::info('Parent created', ['id' => $model->id, 'status' => $model->registration_status]);
         });
         static::updated(function ($model) {
-            Log::info('Parent updated', $model->toArray());
+            Log::info('Parent updated', ['id' => $model->id, 'status' => $model->registration_status]);
         });
         static::deleted(function ($model) {
-            Log::info('Parent deleted', $model->toArray());
+            Log::info('Parent deleted', ['id' => $model->id]);
         });
     }
 

@@ -117,7 +117,7 @@ class RegistrationController extends Controller
         $data['registration_status'] = ParentModel::STATUS_PENDING;
         $parent = ParentModel::create($data);
 
-        Log::info('New parent registered', $parent->toArray());
+        Log::info('New parent registered', ['id' => $parent->id]);
 
         foreach ($validated['children'] as $childData) {
             $childData['student_number'] = $this->assignStudentNumber();
@@ -125,7 +125,7 @@ class RegistrationController extends Controller
             $child = new Child($childData);
             $parent->children()->save($child);
 
-            Log::info("Child created for parent_id={$parent->id}", $child->toArray());
+            Log::info("Child created for parent_id={$parent->id}", ['id' => $child->id, 'student_number' => $child->student_number]);
         }
 
         $price = (count($validated['children']) > 1)
@@ -213,7 +213,7 @@ class RegistrationController extends Controller
 
         // 4) Mark as completed
         $parent->update(['registration_status' => ParentModel::STATUS_COMPLETED]);
-        Log::info('Payment recorded', $payment->toArray());
+        Log::info('Payment recorded', ['id' => $payment->id, 'parent_id' => $payment->parent_id]);
 
         // 5) Clear the token so it’s single-use
         $parent->update(['payment_token' => null]);
@@ -334,7 +334,7 @@ class RegistrationController extends Controller
             'guidelines_accepted',
         ]));
 
-        Log::info('Parent updated via update form', $parent->toArray());
+        Log::info('Parent updated via update form', ['id' => $parent->id]);
 
         $existingChildren = $parent->children()->get();
         $existingChildIds = $existingChildren->pluck('id')->toArray();
@@ -351,14 +351,14 @@ class RegistrationController extends Controller
                 }
 
                 $child->update($childData);
-                Log::info('Child updated', $child->toArray());
+                Log::info('Child updated', ['id' => $child->id]);
             } else {
                 $childData['student_number'] = $this->assignStudentNumber();
                 $childData['year_of_first_registration'] = now()->year;
                 $child = new Child($childData);
                 $parent->children()->save($child);
 
-                Log::info("New child added to parent_id={$parent->id}", $child->toArray());
+                Log::info("New child added to parent_id={$parent->id}", ['id' => $child->id, 'student_number' => $child->student_number]);
             }
         }
 
@@ -428,7 +428,7 @@ class RegistrationController extends Controller
                 'guidelines_accepted' => false,
             ]);
 
-            Log::info('CSV Import: Parent created', $parent->toArray());
+            Log::info('CSV Import: Parent created', ['id' => $parent->id]);
 
             for ($i = 1; $i <= 4; $i++) {
                 if (! empty($record["Child{$i}FirstName"])) {
@@ -450,7 +450,7 @@ class RegistrationController extends Controller
                     ];
                     $child = $parent->children()->create($childData);
 
-                    Log::info('CSV Import: Child created', $child->toArray());
+                    Log::info('CSV Import: Child created', ['id' => $child->id, 'student_number' => $child->student_number]);
                 }
             }
         }

@@ -29,14 +29,15 @@ class Payment extends Model
      */
     protected static function booted()
     {
+        // Identifiers + amount only (no parent PII).
         static::created(function ($model) {
-            Log::info('Payment created', $model->toArray());
+            Log::info('Payment created', ['id' => $model->id, 'parent_id' => $model->parent_id, 'amount_paid' => $model->amount_paid]);
         });
         static::updated(function ($model) {
-            Log::info('Payment updated', $model->toArray());
+            Log::info('Payment updated', ['id' => $model->id, 'parent_id' => $model->parent_id]);
         });
         static::deleted(function ($model) {
-            Log::info('Payment deleted', $model->toArray());
+            Log::info('Payment deleted', ['id' => $model->id, 'parent_id' => $model->parent_id]);
         });
     }
 
