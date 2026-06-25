@@ -64,6 +64,8 @@ the "Custom settings" block in `.env.example` and `config/custom.php`.
 
 ## Documentation
 
+- [docs/deployment.md](docs/deployment.md) — production deploy checklist for
+  the shared server (no Docker; files-on-top).
 - [docs/operations.md](docs/operations.md) — admin SQL/PHP snippets, annual
   reset, reports, admin-user creation.
 - [docs/security.md](docs/security.md) — security review, fixes, and
