@@ -23,6 +23,10 @@
   <link rel="manifest" href="/site.webmanifest">
 
   <!-- Any additional CSS can go here -->
+
+  <!-- App JS bundle (axios + registration form behaviour). Loaded as a
+       deferred module, so it runs after the DOM is parsed. -->
+  @vite(['resources/js/app.js'])
 </head>
 
 <body>

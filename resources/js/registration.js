@@ -37,3 +37,54 @@ export function registrationPrice(childCount, { single, multiple }) {
 
     return childCount > 1 ? multiple : single;
 }
+
+/**
+ * Wire the "+ Add Another Child" / "- Remove Last Child" buttons on the
+ * registration form. No-ops (returns false) when the form isn't on the page,
+ * so it's safe to call on every page that shares the layout.
+ *
+ * `doc` is injectable so the behaviour can be exercised under jsdom.
+ */
+export function initRegistrationForm(doc = document) {
+    const addBtn = doc.getElementById('addChildBtn');
+    const removeBtn = doc.getElementById('removeChildBtn');
+    const container = doc.getElementById('children-container');
+
+    if (!addBtn || !removeBtn || !container) {
+        return false;
+    }
+
+    let childIndex = container.querySelectorAll('.child-block').length;
+
+    addBtn.addEventListener('click', () => {
+        const firstBlock = container.querySelector('.child-block');
+        if (!firstBlock) {
+            return;
+        }
+
+        const newBlock = firstBlock.cloneNode(true);
+        newBlock.querySelectorAll('input, select').forEach((el) => {
+            const name = el.getAttribute('name');
+            if (name) {
+                el.setAttribute('name', renameChildField(name, childIndex));
+            }
+            el.classList.remove('is-invalid');
+            el.value = '';
+        });
+
+        container.appendChild(newBlock);
+        childIndex += 1;
+    });
+
+    removeBtn.addEventListener('click', () => {
+        const blocks = container.querySelectorAll('.child-block');
+        if (canRemoveChild(blocks.length)) {
+            blocks[blocks.length - 1].remove();
+            childIndex -= 1;
+        } else {
+            alert('You must have at least one child!');
+        }
+    });
+
+    return true;
+}

@@ -542,48 +542,7 @@
     <button type="submit" class="btn btn-primary mb-3">Register</button>
 </form>
 
-<!-- JavaScript for dynamic child addition/removal -->
-<script>
-    let childIndex = 1; // The next child index after 0
-
-    const addChildBtn = document.getElementById('addChildBtn');
-    const removeChildBtn = document.getElementById('removeChildBtn');
-    const childrenContainer = document.getElementById('children-container');
-
-    // Add new child block
-    addChildBtn.addEventListener('click', () => {
-        // Clone the first .child-block
-        const firstBlock = document.querySelector('.child-block');
-        const newBlock = firstBlock.cloneNode(true);
-
-        // Find inputs & selects in the cloned block
-        const inputs = newBlock.querySelectorAll('input, select');
-
-        inputs.forEach(el => {
-            // e.g. children[0][first_name] => children[1][first_name]
-            let oldName = el.getAttribute('name');
-            let newName = oldName.replace('[0]', `[${childIndex}]`);
-            el.setAttribute('name', newName);
-
-            // Remove error classes, reset values
-            el.classList.remove('is-invalid');
-            el.value = '';
-        });
-
-        childrenContainer.appendChild(newBlock);
-        childIndex++;
-    });
-
-    // Remove last child block (only if there's more than one)
-    removeChildBtn.addEventListener('click', () => {
-        const childBlocks = document.querySelectorAll('.child-block');
-        if (childBlocks.length > 1) {
-            const lastBlock = childBlocks[childBlocks.length - 1];
-            lastBlock.remove();
-            childIndex--;
-        } else {
-            alert('You must have at least one child!');
-        }
-    });
-</script>
+{{-- The add/remove-child behaviour lives in resources/js/registration.js
+     (initRegistrationForm), bundled via @vite in the layout and unit-tested
+     in tests/js/registration.test.js. --}}
 @endsection

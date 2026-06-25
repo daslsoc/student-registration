@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
     renameChildField,
     canRemoveChild,
     registrationPrice,
+    initRegistrationForm,
 } from '../../resources/js/registration.js';
 
 describe('renameChildField', () => {
@@ -51,5 +52,52 @@ describe('registrationPrice', () => {
 
     it('is free when there are no children', () => {
         expect(registrationPrice(0, rates)).toBe(0);
+    });
+});
+
+describe('initRegistrationForm', () => {
+    function renderForm() {
+        document.body.innerHTML = `
+            <button id="addChildBtn"></button>
+            <button id="removeChildBtn"></button>
+            <div id="children-container">
+                <div class="child-block">
+                    <input name="children[0][first_name]" value="Existing" />
+                    <select name="children[0][gender]"><option>Male</option></select>
+                </div>
+            </div>
+        `;
+    }
+
+    beforeEach(() => renderForm());
+
+    it('no-ops when the form is not present', () => {
+        document.body.innerHTML = '<div></div>';
+        expect(initRegistrationForm(document)).toBe(false);
+    });
+
+    it('adds a child block with re-indexed, cleared fields', () => {
+        initRegistrationForm(document);
+        document.getElementById('addChildBtn').click();
+
+        const blocks = document.querySelectorAll('.child-block');
+        expect(blocks).toHaveLength(2);
+
+        const newInput = blocks[1].querySelector('input');
+        expect(newInput.getAttribute('name')).toBe('children[1][first_name]');
+        expect(newInput.value).toBe('');
+    });
+
+    it('removes the last child but never the final one', () => {
+        initRegistrationForm(document);
+        const add = document.getElementById('addChildBtn');
+        const remove = document.getElementById('removeChildBtn');
+
+        add.click(); // now 2 blocks
+        remove.click(); // back to 1
+        expect(document.querySelectorAll('.child-block')).toHaveLength(1);
+
+        remove.click(); // must not drop below 1
+        expect(document.querySelectorAll('.child-block')).toHaveLength(1);
     });
 });
