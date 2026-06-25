@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegistrationRequest;
 use App\Mail\JoinWhatsAppGroup;
 use App\Mail\RegistrationConfirmation;
 use App\Mail\UpdateRegistrationLink;
@@ -9,7 +10,6 @@ use App\Models\Child;
 use App\Models\ParentModel;
 use App\Models\Payment;
 use App\Models\StudentNumberTracker;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,48 +29,18 @@ use Stripe\Stripe;
 class RegistrationController extends Controller
 {
     /**
-     * Validate the incoming request for registration data.
+     * Registration fee for a given number of children. This is the single
+     * source of truth for pricing — used both when creating the Stripe
+     * charge and when recording the payment, so the stored amount can never
+     * diverge from what was actually charged.
      *
-     * @return array
+     * @return int|float
      */
-    private function validateRegistrationData(Request $request)
+    private function priceForChildCount(int $childCount)
     {
-        Log::info('Validating registration data');
-
-        return $request->validate([
-            'parent1_first_name' => 'required|string|min:2|max:50',
-            'parent1_last_name' => 'required|string|min:2|max:50',
-            'parent1_email' => 'required|email|max:255',
-            'parent1_phone' => 'required|string|min:10|max:10',
-            'parent2_first_name' => 'nullable|string|min:2|max:50',
-            'parent2_last_name' => 'nullable|string|min:2|max:50',
-            'parent2_email' => 'nullable|email|max:255',
-            'parent2_phone' => 'nullable|string|min:10|max:10',
-            'emergency_contact_name' => 'required|string|max:255',
-            'emergency_contact_phone' => 'required|string|min:10|max:10',
-            'relationship_to_family' => 'required|string|max:255',
-            'postcode' => 'nullable|integer|min:4',
-            'guidelines_accepted' => 'required|accepted',
-            'children' => 'required|array|min:1',
-            'children.*.id' => 'nullable|integer|exists:children,id',
-            'children.*.first_name' => 'required|string|max:255',
-            'children.*.last_name' => 'required|string|max:255',
-            'children.*.gender' => 'required|string|in:Male,Female',
-            'children.*.date_of_birth' => [
-                'required',
-                'date_format:Y-m-d',
-                'before:'.Carbon::now()->subYears(config('custom.school.minimum_child_age'))->format('Y-m-d'),
-            ],
-            'children.*.residency_status' => 'required|string|in:Temporary Resident,Permanent Resident,Citizen',
-            'children.*.day_school_name' => 'required|string|max:255',
-            'children.*.day_school_year' => 'required|string|in:Pre School,Kindergarten,Grade 1,Grade 2,Grade 3,Grade 4,Grade 5,Grade 6,Grade 7,Grade 8,Grade 9,Grade 10,Grade 11,Grade 12',
-            'children.*.allergies' => 'nullable|string',
-            'children.*.special_needs' => 'nullable|string',
-            'children.*.dhamma_class' => 'required|string|in:Did not attend last year,Class 1 (A),Class 1 (B),Class 2 (C),Class 3 (D),Class 4 (E)',
-            'children.*.sinhala_class' => 'required|string|in:Did not attend last year,Class 1 (A),Class 1 (B),Class 2 (C),Class 3 (D),Class 4 (E)',
-            'children.*.year_of_first_registration' => 'nullable|integer|min:1991|max:'.now()->year,
-            'children.*.photography_allowed' => 'accepted|sometimes',
-        ]);
+        return $childCount > 1
+            ? config('custom.pricing.multiple_children')
+            : config('custom.pricing.single_child');
     }
 
     /**
@@ -104,9 +74,19 @@ class RegistrationController extends Controller
      *
      * @return RedirectResponse
      */
-    public function handleRegistration(Request $request)
+    public function handleRegistration(RegistrationRequest $request)
     {
-        $validated = $this->validateRegistrationData($request);
+        $validated = $request->validated();
+
+        // If this email is already on file, don't create a duplicate family.
+        // Send them to the "retrieve" flow, which emails a secure link to
+        // update their existing registration.
+        if ($this->findExistingParentByEmail($request->input('parent1_email'))) {
+            return redirect()->route('registration.retrieve')
+                ->withInput(['email' => $request->input('parent1_email')])
+                ->with('status', 'It looks like you have already registered with this email address. '.
+                    'Enter your email below and we will send you a secure link to view or update your details.');
+        }
 
         $data = $request->only([
             'parent1_first_name', 'parent1_last_name', 'parent1_email', 'parent1_phone',
@@ -128,13 +108,26 @@ class RegistrationController extends Controller
             Log::info("Child created for parent_id={$parent->id}", ['id' => $child->id, 'student_number' => $child->student_number]);
         }
 
-        $price = (count($validated['children']) > 1)
-            ? config('custom.pricing.multiple_children')
-            : config('custom.pricing.single_child');
+        $price = $this->priceForChildCount(count($validated['children']));
 
         $stripeSession = $this->createStripeSession($parent, $price);
 
         return redirect($stripeSession->url);
+    }
+
+    /**
+     * Find an existing parent record matching the given email in either the
+     * parent1 or parent2 column. Returns null when no family is on file.
+     */
+    private function findExistingParentByEmail(?string $email): ?ParentModel
+    {
+        if (! $email) {
+            return null;
+        }
+
+        return ParentModel::where('parent1_email', $email)
+            ->orWhere('parent2_email', $email)
+            ->first();
     }
 
     /**
@@ -151,9 +144,10 @@ class RegistrationController extends Controller
         // 2) Store it on the parent record
         $parent->update(['payment_token' => $paymentToken]);
 
-        // 3) Build the success URL with the token
-        // e.g., /registration/success/{parentId}?token=<the-random-string>
-        $successUrl = route('registration.success', ['parent' => $parent->id]).'?token='.$paymentToken.'&amount='.$price;
+        // 3) Build the success URL with the single-use token. The amount is
+        // intentionally NOT in the URL — handleSuccess recomputes it
+        // server-side so it can't be tampered with on the way back.
+        $successUrl = route('registration.success', ['parent' => $parent->id]).'?token='.$paymentToken;
 
         // 4) Set your Stripe API key
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -204,10 +198,13 @@ class RegistrationController extends Controller
                 ->withErrors(['msg' => 'Payment already recorded or not valid.']);
         }
 
-        // 3) If token is valid, create the Payment
+        // 3) If token is valid, create the Payment. The amount is recomputed
+        // server-side from the child count + pricing config — never taken from
+        // the (user-controllable) ?amount= query string, so the recorded figure
+        // always matches what Stripe was told to charge.
         $payment = Payment::create([
             'parent_id' => $parent->id,
-            'amount_paid' => $request->query('amount'),
+            'amount_paid' => $this->priceForChildCount($parent->children()->count()),
             'paid_date' => now(),
         ]);
 
@@ -306,7 +303,7 @@ class RegistrationController extends Controller
      * @param  string  $token
      * @return RedirectResponse
      */
-    public function handleUpdate(Request $request, $token)
+    public function handleUpdate(RegistrationRequest $request, $token)
     {
         try {
             $parent = ParentModel::where('update_token', $token)
@@ -316,7 +313,7 @@ class RegistrationController extends Controller
             return redirect('registration.retrieve')->withErrors(['msg' => 'That link has expired. Make sure you have clicked on the latest email or else enter your email and try again.']);
         }
 
-        $validated = $this->validateRegistrationData($request);
+        $validated = $request->validated();
 
         $parent->update($request->only([
             'parent1_first_name',
@@ -371,9 +368,7 @@ class RegistrationController extends Controller
 
         // if already paid then redirect to success page
         if ($parent->registration_status != ParentModel::STATUS_COMPLETED) {
-            $price = (count($validated['children']) > 1)
-                ? config('custom.pricing.multiple_children')
-                : config('custom.pricing.single_child');
+            $price = $this->priceForChildCount(count($validated['children']));
 
             $stripeSession = $this->createStripeSession($parent, $price);
 

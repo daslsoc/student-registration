@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Child;
 use App\Models\ParentModel;
-use App\Models\Payment;
 use App\Models\StudentNumberTracker;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -168,6 +167,82 @@ class RegistrationFeatureTest extends TestCase
             'parent_id' => $parent->id,
             'amount_paid' => 100.00,
         ]);
+    }
+
+    /**
+     * The recorded payment amount must be computed server-side from the child
+     * count + pricing config, NOT read from the ?amount= query string (which a
+     * user can forge). A parent with two children must be billed the
+     * multiple-children price even if the URL claims a lower amount.
+     *
+     * @return void
+     */
+    public function test_success_amount_is_server_computed_and_ignores_query_string()
+    {
+        $parent = ParentModel::factory()->create();
+        Child::factory()->count(2)->create(['parent_id' => $parent->id]);
+
+        $paymentToken = Str::random(32);
+        $parent->update(['payment_token' => $paymentToken]);
+
+        // Forge a tiny amount in the URL; it must be ignored.
+        $response = $this->get('/registration/success/'.$parent->id.'?amount=1&token='.$paymentToken);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('payments', [
+            'parent_id' => $parent->id,
+            'amount_paid' => config('custom.pricing.multiple_children'),
+        ]);
+        $this->assertDatabaseMissing('payments', [
+            'parent_id' => $parent->id,
+            'amount_paid' => 1,
+        ]);
+    }
+
+    /**
+     * Re-registering with an email already on file should not create a second
+     * family. Instead the user is redirected to the retrieve flow to get a
+     * secure update link.
+     *
+     * @return void
+     */
+    public function test_duplicate_email_registration_redirects_to_retrieve()
+    {
+        ParentModel::factory()->create(['parent1_email' => 'existing@example.com']);
+
+        $response = $this->post('/registration', [
+            'parent1_first_name' => 'Jane',
+            'parent1_last_name' => 'Doe',
+            'parent1_email' => 'existing@example.com',
+            'parent1_phone' => '5551234687',
+            'emergency_contact_name' => 'Alice',
+            'emergency_contact_phone' => '5555678541',
+            'relationship_to_family' => 'Aunt',
+            'postcode' => '5678',
+            'guidelines_accepted' => true,
+            'children' => [
+                [
+                    'first_name' => 'ChildOne',
+                    'last_name' => 'Doe',
+                    'gender' => 'Female',
+                    'date_of_birth' => '2010-01-01',
+                    'residency_status' => 'Citizen',
+                    'day_school_name' => 'ABC School',
+                    'day_school_year' => 'Grade 5',
+                    'dhamma_class' => 'Class 2 (C)',
+                    'sinhala_class' => 'Class 3 (D)',
+                    'student_number' => '001',
+                    'photography_allowed' => true,
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('registration.retrieve'));
+        $response->assertSessionHas('status');
+
+        // No duplicate parent and no children were created.
+        $this->assertDatabaseCount('parents', 1);
+        $this->assertDatabaseCount('children', 0);
     }
 
     /**

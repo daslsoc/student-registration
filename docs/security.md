@@ -53,26 +53,39 @@ not infrastructure/hosting.
   `tests/Feature/SecurityHeadersTest.php`.
 - **Production env guidance.** `.env.example` now documents
   `APP_DEBUG=false` and `SESSION_SECURE_COOKIE=true` for production.
+- **Server-side payment amount (was follow-up #1).** `handleSuccess` no longer
+  reads `amount_paid` from the user-controllable `?amount=` query string. The
+  amount is recomputed from the parent's child count + `config('custom.pricing')`
+  via `RegistrationController::priceForChildCount()`, the single source of truth
+  shared with the Stripe charge. The `amount` param has also been dropped from
+  the success URL entirely. Covered by
+  `test_success_amount_is_server_computed_and_ignores_query_string`.
+- **Shared validation in a FormRequest (was follow-up #3).** The new- and
+  update-registration rules now live in `App\Http\Requests\RegistrationRequest`
+  instead of a private controller method, so both flows validate identically.
+- **Duplicate-registration guard.** Re-registering with an email already on
+  file no longer creates a second family; the user is redirected to the
+  retrieve flow (with the email pre-filled) to request a secure update link.
+  Covered by `test_duplicate_email_registration_redirects_to_retrieve`.
 
 ## Recommended follow-ups (not changed here)
 
 These are real improvements deliberately left out of this change to avoid
-altering payment behaviour / mass-assignment semantics without owner sign-off:
+altering payment / mass-assignment semantics without owner sign-off:
 
-1. **Trust the server, not the query string, for the recorded amount.**
-   `handleSuccess` records `amount_paid` from `?amount=` in the success URL,
-   which the user controls. The actual Stripe charge is computed server-side
-   and is correct, but the stored figure is forgeable. Recompute it from the
-   child count + `config('custom.pricing')` instead.
+1. **Add a Stripe webhook + signature verification.** The source of truth for
+   "did this family pay" is still the browser redirect to the success URL. If
+   that redirect never completes (network drop, closed tab) the family is
+   charged but stays `pending` with no reconciliation. A webhook on
+   `checkout.session.completed` (verified with the signing secret) should be
+   what marks the registration complete and records the payment.
 2. **Drop sensitive columns from `$fillable`.** Remove `payment_token`,
    `update_token`, `token_expires_at`, and `registration_status` from
    `ParentModel::$fillable` and set them via `forceFill()->save()` in the
    controller. Defense-in-depth against a future `create($request->all())`.
-3. **Move validation into FormRequest classes** (`StoreRegistrationRequest`,
-   etc.) so rules live next to authorization and are reused by the update path.
-4. **Add a Content-Security-Policy.** The public pages load Bootstrap/jQuery
+3. **Add a Content-Security-Policy.** The public pages load Bootstrap/jQuery
    from jsDelivr and Google Analytics, so a CSP needs an allow-list, e.g.
    `script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com`.
    Start in `Content-Security-Policy-Report-Only` mode.
-5. **Set `APP_DEBUG=false` and `SESSION_SECURE_COOKIE=true`** in the production
+4. **Set `APP_DEBUG=false` and `SESSION_SECURE_COOKIE=true`** in the production
    `.env` (the example documents this; verify the live value).

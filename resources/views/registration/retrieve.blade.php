@@ -37,6 +37,7 @@
                    class="form-control @error('email') is-invalid @enderror"
                    name="email"
                    id="email"
+                   value="{{ old('email') }}"
                    placeholder="Enter Parent 1 or Parent 2 email"
                    required>
             @error('email')
