@@ -14,6 +14,8 @@
 
 <p>Welcome! Please fill out the form below to register your child(ren) for the Dhamma and Sinhala Language School of Canberra. Ensure all information is accurate for a smooth registration process.</p>
 
+<p class="text-body-secondary"><small>This form takes about 5 minutes to complete. At the end you'll be taken to make payment, which is processed securely by Stripe &mdash; your card details are never stored on our servers.</small></p>
+
 @if(session('status'))
 <div class="alert alert-success">{{ session('status') }}</div>
 @endif

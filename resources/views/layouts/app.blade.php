@@ -33,7 +33,7 @@
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="/">
-        <img src="/images/logo.png" alt="logo" width="27" height="30" class="d-inline-block align-text-top">
+        <img src="/images/logo.png" alt="" width="27" height="30" class="d-inline-block align-text-top">
         Dhamma and Sinhala Language School of Canberra
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,9 +41,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-          <a class="nav-link" aria-current="page" href="{{route('registration.form')}}">Register New Family</a>
-          <a class="nav-link" aria-current="page" href="{{route('registration.retrieve')}}">Update Existing Family</a>
-          <a class="nav-link" aria-current="page" href="{{route('guidelines')}}">Guidelines</a>
+          <a class="nav-link {{ request()->routeIs('registration.form') ? 'active' : '' }}" @if(request()->routeIs('registration.form')) aria-current="page" @endif href="{{route('registration.form')}}">Register New Family</a>
+          <a class="nav-link {{ request()->routeIs('registration.retrieve') ? 'active' : '' }}" @if(request()->routeIs('registration.retrieve')) aria-current="page" @endif href="{{route('registration.retrieve')}}">Update Existing Registration</a>
+          <a class="nav-link {{ request()->routeIs('guidelines') ? 'active' : '' }}" @if(request()->routeIs('guidelines')) aria-current="page" @endif href="{{route('guidelines')}}">Guidelines</a>
           @if (Auth::check())
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -86,13 +86,22 @@
   </div>
 
   <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-    <div class="col-md-4 d-flex align-items-center">
-      <span class="mx-3 mb-3 mb-md-0 text-body-secondary">Developed and supported by CodiPhi Solutions</span>
+    <div class="col-md-6 d-flex align-items-center">
+      <span class="mx-3 mb-3 mb-md-0 text-body-secondary">&copy; {{ date('Y') }} {{ config('custom.school.name') }}</span>
+    </div>
+    <div class="col-md-6 d-flex align-items-center justify-content-md-end">
+      <span class="mx-3 mb-3 mb-md-0 text-body-secondary">
+        @if(config('custom.school.email'))
+          Questions? <a href="mailto:{{ config('custom.school.email') }}">{{ config('custom.school.email') }}</a> &middot;
+        @endif
+        Developed and supported by CodiPhi Solutions
+      </span>
     </div>
   </footer>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  @if(config('custom.tracking.google_analytics_id'))
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('custom.tracking.google_analytics_id') }}"></script>
   <script>
@@ -105,6 +114,7 @@
 
     gtag('config', '{{ config("custom.tracking.google_analytics_id") }}');
   </script>
+  @endif
 </body>
 
 </html>
