@@ -123,6 +123,8 @@ dusk-up: ## Bring up app/nginx/db/selenium with the Dusk DB override
 	@# php-fpm serves as www-data, but the mounted storage is host-owned —
 	@# make it writable so file sessions/cache/compiled views work.
 	$(DC_DUSK) exec -T -u root app chown -R www-data:www-data storage bootstrap/cache
+	@echo "Waiting for Selenium..."
+	@$(DC_DUSK) run --rm app sh -c 'for i in $$(seq 1 30); do curl -sf http://selenium:4444/status >/dev/null 2>&1 && exit 0; sleep 1; done; echo "Selenium not ready" >&2; exit 1'
 
 .PHONY: dusk-down
 dusk-down: ## Restore app to the normal dev DB (after a Dusk run)
