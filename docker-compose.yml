@@ -34,7 +34,7 @@ services:
       # Use custom Nginx config
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "80:80"
+      - "8090:80"
     networks:
       - laravel_net
 

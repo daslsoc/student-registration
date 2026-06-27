@@ -28,6 +28,8 @@ make db-setup                 # create + migrate the test/dusk databases
 make artisan ARGS="migrate"   # migrate the dev database
 ```
 
+The app is then served at **http://localhost:8090**.
+
 Create an admin user and run post-deploy optimisation: see
 [docs/operations.md](docs/operations.md).
 
