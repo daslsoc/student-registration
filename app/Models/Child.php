@@ -33,8 +33,6 @@ class Child extends Model
         'day_school_year',
         'allergies',
         'special_needs',
-        'dhamma_class',
-        'sinhala_class',
         'allocated_dhamma_class',
         'allocated_sinhala_class',
         'student_number',

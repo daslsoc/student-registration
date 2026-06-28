@@ -56,8 +56,6 @@ class RegistrationRequest extends FormRequest
             'children.*.day_school_year' => 'required|string|in:Pre School,Kindergarten,Grade 1,Grade 2,Grade 3,Grade 4,Grade 5,Grade 6,Grade 7,Grade 8,Grade 9,Grade 10,Grade 11,Grade 12',
             'children.*.allergies' => 'nullable|string',
             'children.*.special_needs' => 'nullable|string',
-            'children.*.dhamma_class' => 'required|string|in:Did not attend last year,Class 1 (A),Class 1 (B),Class 2 (C),Class 3 (D),Class 4 (E)',
-            'children.*.sinhala_class' => 'required|string|in:Did not attend last year,Class 1 (A),Class 1 (B),Class 2 (C),Class 3 (D),Class 4 (E)',
             'children.*.year_of_first_registration' => 'nullable|integer|min:1991|max:'.now()->year,
             'children.*.photography_allowed' => 'accepted|sometimes',
         ];

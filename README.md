@@ -65,6 +65,18 @@ The app reads school-specific values (name, pricing, minimum child age,
 WhatsApp link, Google Analytics id, Stripe secret) from the environment — see
 the "Custom settings" block in `.env.example` and `config/custom.php`.
 
+## Admin area
+
+Signed-in staff have an **Admin** menu with:
+
+- **Parents & Child list** and **Orientation list** — roster views (searchable).
+- **Allergies & Medical** (`/admin/allergies`) — every enrolled student with a
+  real allergy or special need (anything other than "None"), with their class
+  and contact details, as a quick medical reference.
+- **Class Relocation** and **Unallocated Students** — see the allocation
+  section below.
+- **Import CSV** / **Export CSV** — bulk parent/child data.
+
 ## Attendance integration (class allocation + sync API)
 
 When a parent completes payment, each child is **auto-allocated to a class**
@@ -77,12 +89,17 @@ allocations.
   Edit the bands there without touching code.
 - **At payment** (`RegistrationController::handleSuccess`), `ClassAllocator`
   sets `children.allocated_dhamma_class` and `allocated_sinhala_class` (both to
-  the same class initially). The existing `dhamma_class` / `sinhala_class` are
-  left as last-year history.
-- **Admins can override** at `/admin/allocations` (behind login) — for
-  exceptions or moves. Saving bumps `children.updated_at`, which is the sync
-  clock.
-- **The confirmation email** now tells parents the allocated class.
+  the same class initially).
+- **Admins manage allocations** (behind login) via two pages:
+  - **Unallocated Students** (`/admin/unallocated`) — paid students still
+    missing a class for at least one subject (e.g. a day-school year not in the
+    rule).
+  - **Class Relocation** (`/admin/class-relocation`) — search any student by
+    name or student number and move them to a different class. Parents are
+    emailed automatically when a class actually changes.
+
+  Saving on either page bumps `children.updated_at`, which is the sync clock.
+- **The confirmation email** tells parents the allocated class.
 - **The API** (token-gated via `INTEGRATION_API_TOKEN`):
   `GET /api/integration/changes?since=<ts>` returns
   `{ last_changed_at, count, students:[…] }` — the paid children and their

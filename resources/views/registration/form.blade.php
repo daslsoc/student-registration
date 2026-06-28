@@ -394,7 +394,7 @@
                     <input type="text"
                         class="form-control @error('children.0.allergies') is-invalid @enderror"
                         name="children[0][allergies]"
-                        value="{{ old('children.0.allergies') }}">
+                        value="{{ old('children.0.allergies', 'None') }}">
                     @error('children.0.allergies')
                     <small class="text-danger">{{ $message }}</small>
                     @enderror
@@ -407,82 +407,8 @@
                     <input type="text"
                         class="form-control @error('children.0.special_needs') is-invalid @enderror"
                         name="children[0][special_needs]"
-                        value="{{ old('children.0.special_needs') }}">
+                        value="{{ old('children.0.special_needs', 'None') }}">
                     @error('children.0.special_needs')
-                    <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Dhamma Class Last Year (in {{ date('Y') - 1 }})</label>
-                <div class="col-sm-3">
-                    <select class="form-select @error('children.0.dhamma_class') is-invalid @enderror"
-                        name="children[0][dhamma_class]"
-                        required>
-                        <option value="Did not attend last year"
-                            {{ old('children.0.dhamma_class') == 'Did not attend last year' ? 'selected' : '' }}>
-                            Did not attend last year
-                        </option>
-                        <option value="Class 1 (A)"
-                            {{ old('children.0.dhamma_class') == 'Class 1 (A)' ? 'selected' : '' }}>
-                            Class 1 (A)
-                        </option>
-                        <option value="Class 1 (B)"
-                            {{ old('children.0.dhamma_class') == 'Class 1 (B)' ? 'selected' : '' }}>
-                            Class 1 (B)
-                        </option>
-                        <option value="Class 2 (C)"
-                            {{ old('children.0.dhamma_class') == 'Class 2 (C)' ? 'selected' : '' }}>
-                            Class 2 (C)
-                        </option>
-                        <option value="Class 3 (D)"
-                            {{ old('children.0.dhamma_class') == 'Class 3 (D)' ? 'selected' : '' }}>
-                            Class 3 (D)
-                        </option>
-                        <option value="Class 4 (E)"
-                            {{ old('children.0.dhamma_class') == 'Class 4 (E)' ? 'selected' : '' }}>
-                            Class 4 (E)
-                        </option>
-                    </select>
-                    @error('children.0.dhamma_class')
-                    <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Sinhala Class Last Year (in {{ date('Y') - 1 }})</label>
-                <div class="col-sm-3">
-                    <select class="form-select @error('children.0.sinhala_class') is-invalid @enderror"
-                        name="children[0][sinhala_class]"
-                        required>
-                        <option value="Did not attend last year"
-                            {{ old('children.0.sinhala_class') == 'Did not attend last year' ? 'selected' : '' }}>
-                            Did not attend last year
-                        </option>
-                        <option value="Class 1 (A)"
-                            {{ old('children.0.sinhala_class') == 'Class 1 (A)' ? 'selected' : '' }}>
-                            Class 1 (A)
-                        </option>
-                        <option value="Class 1 (B)"
-                            {{ old('children.0.sinhala_class') == 'Class 1 (B)' ? 'selected' : '' }}>
-                            Class 1 (B)
-                        </option>
-                        <option value="Class 2 (C)"
-                            {{ old('children.0.sinhala_class') == 'Class 2 (C)' ? 'selected' : '' }}>
-                            Class 2 (C)
-                        </option>
-                        <option value="Class 3 (D)"
-                            {{ old('children.0.sinhala_class') == 'Class 3 (D)' ? 'selected' : '' }}>
-                            Class 3 (D)
-                        </option>
-                        <option value="Class 4 (E)"
-                            {{ old('children.0.sinhala_class') == 'Class 4 (E)' ? 'selected' : '' }}>
-                            Class 4 (E)
-                        </option>
-                    </select>
-                    @error('children.0.sinhala_class')
                     <small class="text-danger">{{ $message }}</small>
                     @enderror
                 </div>

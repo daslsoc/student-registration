@@ -44,8 +44,8 @@ class AdminExportCsvTest extends TestCase
             'first_name' => 'Kiddo',
             'last_name' => 'Doe',
             'day_school_name' => 'TestSchool',
-            'dhamma_class' => 'Grade 1',
-            'sinhala_class' => 'Level A',
+            'allocated_dhamma_class' => 'Class C',
+            'allocated_sinhala_class' => 'Class D',
         ]);
 
         // 2) Act: call the export-csv route
@@ -69,6 +69,9 @@ class AdminExportCsvTest extends TestCase
         $this->assertStringContainsString('Doe', $csvContent);
         $this->assertStringContainsString('Kiddo', $csvContent);
         $this->assertStringContainsString('TestSchool', $csvContent);
+        // The allocated classes are exported for downstream/attendance use.
+        $this->assertStringContainsString('Class C', $csvContent);
+        $this->assertStringContainsString('Class D', $csvContent);
     }
 
     /**
@@ -180,5 +183,7 @@ class AdminExportCsvTest extends TestCase
         $this->assertStringContainsString('Parent1LastName', $csvContent);
         $this->assertStringContainsString('ChildFirstName', $csvContent);
         $this->assertStringContainsString('SchoolName', $csvContent);
+        $this->assertStringContainsString('AllocatedDhammaClass', $csvContent);
+        $this->assertStringContainsString('AllocatedSinhalaClass', $csvContent);
     }
 }

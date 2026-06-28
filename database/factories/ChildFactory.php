@@ -39,8 +39,6 @@ class ChildFactory extends Factory
             'day_school_year' => $this->faker->numberBetween(1, 12),
             'allergies' => $this->faker->boolean ? $this->faker->word : null,
             'special_needs' => $this->faker->boolean ? $this->faker->sentence : null,
-            'dhamma_class' => $this->faker->randomElement(['Grade 1', 'Grade 2', 'Grade 3']),
-            'sinhala_class' => $this->faker->randomElement(['Level A', 'Level B', 'Level C']),
             'student_number' => $this->faker->unique()->numberBetween(1000, 9999),
             'year_of_first_registration' => Carbon::now()->year,
         ];

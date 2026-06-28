@@ -37,8 +37,6 @@
         <tr>
             <th>Student ID</th>
             <th>Child Name</th>
-            <th>Dhamma Class (last year)</th>
-            <th>Sinhala Class (last year)</th>
             <th>Allocated Dhamma Class</th>
             <th>Allocated Sinhala Class</th>
             <th>Day School Year</th>
@@ -59,8 +57,6 @@
                 <tr>
                     <td>{{ $child->student_number }}</td>
                     <td>{{ $child->first_name }} {{ $child->last_name }}</td>
-                    <td>{{ $child->dhamma_class }}</td>
-                    <td>{{ $child->sinhala_class }}</td>
                     <td>{{ $child->allocated_dhamma_class ?? '—' }}</td>
                     <td>{{ $child->allocated_sinhala_class ?? '—' }}</td>
                     <td>{{ $child->day_school_year }}</td>

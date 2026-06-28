@@ -70,6 +70,11 @@ export function initRegistrationForm(doc = document) {
             }
             el.classList.remove('is-invalid');
             el.value = '';
+            // Allergies / special needs default to "None" so the common
+            // "nothing to report" case needs no typing.
+            if (name && (name.includes('[allergies]') || name.includes('[special_needs]'))) {
+                el.value = 'None';
+            }
         });
 
         container.appendChild(newBlock);

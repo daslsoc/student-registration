@@ -64,6 +64,8 @@ describe('initRegistrationForm', () => {
                 <div class="child-block">
                     <input name="children[0][first_name]" value="Existing" />
                     <select name="children[0][gender]"><option>Male</option></select>
+                    <input name="children[0][allergies]" value="" />
+                    <input name="children[0][special_needs]" value="" />
                 </div>
             </div>
         `;
@@ -86,6 +88,15 @@ describe('initRegistrationForm', () => {
         const newInput = blocks[1].querySelector('input');
         expect(newInput.getAttribute('name')).toBe('children[1][first_name]');
         expect(newInput.value).toBe('');
+    });
+
+    it('defaults a new child\'s allergies and special needs to "None"', () => {
+        initRegistrationForm(document);
+        document.getElementById('addChildBtn').click();
+
+        const newBlock = document.querySelectorAll('.child-block')[1];
+        expect(newBlock.querySelector('[name="children[1][allergies]"]').value).toBe('None');
+        expect(newBlock.querySelector('[name="children[1][special_needs]"]').value).toBe('None');
     });
 
     it('removes the last child but never the final one', () => {

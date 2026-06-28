@@ -41,6 +41,40 @@ class AdminController extends Controller
     }
 
     /**
+     * Medical reference: every enrolled student who has a real allergy OR a
+     * real special need recorded (anything other than null, blank, or "None").
+     * Includes the child's class and who to contact, so staff can act quickly.
+     */
+    public function showAllergies()
+    {
+        $children = Child::query()
+            ->whereNotNull('student_number')
+            ->where(function ($q) {
+                $q->where(fn ($a) => $this->scopeHasRealValue($a, 'allergies'))
+                    ->orWhere(fn ($s) => $this->scopeHasRealValue($s, 'special_needs'));
+            })
+            ->with('parent:id,parent1_first_name,parent1_last_name,parent1_phone,parent1_email,emergency_contact_name,emergency_contact_phone')
+            ->orderBy('first_name')
+            ->get();
+
+        Log::info('Admin viewing allergies/medical list', ['count' => $children->count()]);
+
+        return view('admin.allergies', compact('children'));
+    }
+
+    /**
+     * Constrain a query so the given column holds a meaningful value — i.e. not
+     * null, not blank, and not "None" (any case). Used for the allergies and
+     * special-needs medical columns, which both use "None" as the empty marker.
+     */
+    private function scopeHasRealValue($query, string $column)
+    {
+        return $query->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->whereRaw("LOWER(TRIM({$column})) != ?", ['none']);
+    }
+
+    /**
      * Worklist of *paid* students who still need a class for at least one
      * subject — e.g. someone whose day-school year wasn't in the auto-allocation
      * rule. Lets an admin fill the gaps. To move an already-allocated student
@@ -192,8 +226,7 @@ class AdminController extends Controller
             'Parent2FirstName', 'Parent2LastName', 'Parent2Email', 'Parent2Phone',
             'EmergencyContact', 'EmergencyPhone', 'Relationship', 'ChildFirstName',
             'ChildLastName', 'DOB', 'Residency', 'SchoolName', 'SchoolYear', 'Allergies',
-            'SpecialNeeds', 'DhammaClassLastYear', 'SinhalaClassLastYear',
-            'AllocatedDhammaClass', 'AllocatedSinhalaClass',
+            'SpecialNeeds', 'AllocatedDhammaClass', 'AllocatedSinhalaClass',
         ];
 
         $callback = function () use ($parents, $columns) {
@@ -223,8 +256,6 @@ class AdminController extends Controller
                         $child->day_school_year,
                         $child->allergies,
                         $child->special_needs,
-                        $child->dhamma_class,
-                        $child->sinhala_class,
                         $child->allocated_dhamma_class,
                         $child->allocated_sinhala_class,
                     ];

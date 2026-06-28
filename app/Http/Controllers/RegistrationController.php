@@ -452,8 +452,6 @@ class RegistrationController extends Controller
                         'day_school_year' => $record["Child{$i}DaySchoolYear"],
                         'allergies' => $record["Child{$i}Allergies"],
                         'special_needs' => $record["Child{$i}SpecialNeeds"],
-                        'dhamma_class' => $record["Child{$i}DhammaClass"],
-                        'sinhala_class' => $record["Child{$i}SinhalaClass"],
                         'student_number' => $record["Child{$i}StudentNumber"],
                         'year_of_first_registration' => $request->input('default_registration_year'),
                         'photography_allowed' => filter_var($record["Child{$i}PhotographyAllowed"], FILTER_VALIDATE_BOOLEAN),

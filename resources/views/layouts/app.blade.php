@@ -52,6 +52,7 @@
             <div class="dropdown-menu">
               <a class="dropdown-item" href="{{route('admin.parent_student_list')}}">Parents & Child List</a>
               <a class="dropdown-item" href="{{route('admin.orientation_list')}}">Orientation List</a>
+              <a class="dropdown-item" href="{{route('admin.allergies')}}">Allergies &amp; Medical</a>
               <a class="dropdown-item" href="{{route('admin.class_relocation')}}">Class Relocation</a>
               <a class="dropdown-item" href="{{route('admin.unallocated')}}">Unallocated Students</a>
               <a class="dropdown-item" href="{{route('admin.show_import_csv')}}">Import CSV</a>

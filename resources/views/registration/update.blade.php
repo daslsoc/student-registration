@@ -243,6 +243,17 @@
                     X
                 </button>
 
+                <!-- Allocated class for the current year. Read-only — shown for
+                     visibility only; allocations are managed by the school.
+                     mt-4 keeps it clear of the absolutely-positioned X button. -->
+                <div class="alert alert-info py-2 mt-4 allocated-info">
+                    <strong>Allocated class for {{ date('Y') }}</strong>
+                    (set by the school — shown for your information):<br>
+                    Buddhism: {{ $child->allocated_dhamma_class ?? 'To be advised' }}
+                    &middot;
+                    Sinhala: {{ $child->allocated_sinhala_class ?? 'To be advised' }}
+                </div>
+
                 <div class="mb-3 row">
                     <label class="col-sm-3 col-form-label">Child First Name</label>
                     <div class="col-sm-7">
@@ -435,80 +446,6 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Dhamma Class Last Year (in {{ date('Y') - 1 }})</label>
-                    <div class="col-sm-3">
-                        <select class="form-select @error('children.'.$index.'.dhamma_class') is-invalid @enderror"
-                            name="children[{{ $index }}][dhamma_class]"
-                            required>
-                            <option value="Did not attend last year"
-                                {{ old('children.'.$index.'.dhamma_class', $child->dhamma_class) == 'Did not attend last year' ? 'selected' : '' }}>
-                                Did not attend last year
-                            </option>
-                            <option value="Class 1 (A)"
-                                {{ old('children.'.$index.'.dhamma_class', $child->dhamma_class) == 'Class 1 (A)' ? 'selected' : '' }}>
-                                Class 1 (A)
-                            </option>
-                            <option value="Class 1 (B)"
-                                {{ old('children.'.$index.'.dhamma_class', $child->dhamma_class) == 'Class 1 (B)' ? 'selected' : '' }}>
-                                Class 1 (B)
-                            </option>
-                            <option value="Class 2 (C)"
-                                {{ old('children.'.$index.'.dhamma_class', $child->dhamma_class) == 'Class 2 (C)' ? 'selected' : '' }}>
-                                Class 2 (C)
-                            </option>
-                            <option value="Class 3 (D)"
-                                {{ old('children.'.$index.'.dhamma_class', $child->dhamma_class) == 'Class 3 (D)' ? 'selected' : '' }}>
-                                Class 3 (D)
-                            </option>
-                            <option value="Class 4 (E)"
-                                {{ old('children.'.$index.'.dhamma_class', $child->dhamma_class) == 'Class 4 (E)' ? 'selected' : '' }}>
-                                Class 4 (E)
-                            </option>
-                        </select>
-                        @error('children.'.$index.'.dhamma_class')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Sinhala Class Last Year (in {{ date('Y') - 1 }})</label>
-                    <div class="col-sm-3">
-                        <select class="form-select @error('children.'.$index.'.sinhala_class') is-invalid @enderror"
-                            name="children[{{ $index }}][sinhala_class]"
-                            required>
-                            <option value="Did not attend last year"
-                                {{ old('children.'.$index.'.sinhala_class', $child->sinhala_class) == 'Did not attend last year' ? 'selected' : '' }}>
-                                Did not attend last year
-                            </option>
-                            <option value="Class 1 (A)"
-                                {{ old('children.'.$index.'.sinhala_class', $child->sinhala_class) == 'Class 1 (A)' ? 'selected' : '' }}>
-                                Class 1 (A)
-                            </option>
-                            <option value="Class 1 (B)"
-                                {{ old('children.'.$index.'.sinhala_class', $child->sinhala_class) == 'Class 1 (B)' ? 'selected' : '' }}>
-                                Class 1 (B)
-                            </option>
-                            <option value="Class 2 (C)"
-                                {{ old('children.'.$index.'.sinhala_class', $child->sinhala_class) == 'Class 2 (C)' ? 'selected' : '' }}>
-                                Class 2 (C)
-                            </option>
-                            <option value="Class 3 (D)"
-                                {{ old('children.'.$index.'.sinhala_class', $child->sinhala_class) == 'Class 3 (D)' ? 'selected' : '' }}>
-                                Class 3 (D)
-                            </option>
-                            <option value="Class 4 (E)"
-                                {{ old('children.'.$index.'.sinhala_class', $child->sinhala_class) == 'Class 4 (E)' ? 'selected' : '' }}>
-                                Class 4 (E)
-                            </option>
-                        </select>
-                        @error('children.'.$index.'.sinhala_class')
-                        <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
                     <label class="col-sm-3 col-form-label">Year First Registered</label>
                     <div class="col-sm-2">
                         <input type="text"
@@ -596,6 +533,12 @@
             if (hiddenId) {
                 hiddenId.remove();
             }
+
+            // A new child has no allocation yet — drop the read-only info box.
+            const allocatedInfo = newBlock.querySelector('.allocated-info');
+            if (allocatedInfo) {
+                allocatedInfo.remove();
+            }
         } else {
             // Alternatively, create a fresh block from scratch. For brevity,
             // we'll do a minimal approach here.
@@ -632,6 +575,10 @@
             // Clear any is-invalid classes or old values
             el.classList.remove('is-invalid');
             if (el.tagName !== 'SELECT') el.value = '';
+            // Default allergies / special needs to "None" for a new child.
+            if (oldName && (oldName.includes('[allergies]') || oldName.includes('[special_needs]'))) {
+                el.value = 'None';
+            }
         });
 
         childrenContainer.appendChild(newBlock);
