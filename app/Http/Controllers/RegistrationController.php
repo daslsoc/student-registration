@@ -10,6 +10,7 @@ use App\Models\Child;
 use App\Models\ParentModel;
 use App\Models\Payment;
 use App\Models\StudentNumberTracker;
+use App\Services\ClassAllocator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -211,6 +212,20 @@ class RegistrationController extends Controller
         // 4) Mark as completed
         $parent->update(['registration_status' => ParentModel::STATUS_COMPLETED]);
         Log::info('Payment recorded', ['id' => $payment->id, 'parent_id' => $payment->parent_id]);
+
+        // 4b) Auto-allocate each child to a class for both subjects from their
+        // day-school year. Bumps children.updated_at, which the attendance app
+        // uses as the "what changed" clock. Admins can override later.
+        $allocator = app(ClassAllocator::class);
+        foreach ($parent->children as $child) {
+            $class = $allocator->classForGrade($child->day_school_year);
+            if ($class !== null) {
+                $child->update([
+                    'allocated_dhamma_class' => $class,
+                    'allocated_sinhala_class' => $class,
+                ]);
+            }
+        }
 
         // 5) Clear the token so it’s single-use
         $parent->update(['payment_token' => null]);

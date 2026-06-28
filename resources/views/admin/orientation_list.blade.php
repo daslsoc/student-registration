@@ -30,6 +30,8 @@
             <th>Registration Status</th>
             <th>Child Name</th>
             <th>Day School Year</th>
+            <th>Allocated Dhamma Class</th>
+            <th>Allocated Sinhala Class</th>
             <th>Age (Now)</th>
             <th>Parent 1 Name</th>
             <th>Parent 2 Name</th>
@@ -44,6 +46,8 @@
                     <td>{{ $parent->registration_status }}</td>
                     <td>{{ $child->first_name }} {{ $child->last_name }}</td>
                     <td>{{ $child->day_school_year }}</td>
+                    <td>{{ $child->allocated_dhamma_class ?? '—' }}</td>
+                    <td>{{ $child->allocated_sinhala_class ?? '—' }}</td>
                     <td>{{ $child->age() }}</td>
                     <td>
                         {{ $parent->parent1_first_name }} {{ $parent->parent1_last_name }}

@@ -57,6 +57,8 @@
     <strong>Day School:</strong> {{ $child->day_school_name }} (Year: {{ $child->day_school_year }})<br>
     <strong>Dhamma Class Last Year (in {{ date('Y') - 1 }}):</strong> {{ $child->dhamma_class }}<br>
     <strong>Sinhala Class Last Year (in {{ date('Y') - 1 }}):</strong> {{ $child->sinhala_class }}<br>
+    <strong>Allocated Class for {{ date('Y') }}:</strong>
+        {{ $child->allocated_dhamma_class ?? 'to be advised' }}@if($child->allocated_sinhala_class && $child->allocated_sinhala_class !== $child->allocated_dhamma_class) (Sinhala: {{ $child->allocated_sinhala_class }})@endif<br>
     <strong>Allergies:</strong> {{ $child->allergies ?? 'N/A' }}<br>
     <strong>Special Needs:</strong> {{ $child->special_needs ?? 'N/A' }}<br>
     <strong>Photography Allowed:</strong> {{ $child->photography_allowed ? 'Yes' : 'No' }}<br>

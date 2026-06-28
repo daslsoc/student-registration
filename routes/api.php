@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\PaidStudentController;
+use App\Http\Controllers\Api\ChangesController;
 use App\Http\Middleware\VerifyApiToken;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +10,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware([VerifyApiToken::class, 'throttle:60,1'])->group(function () {
-    Route::get('/integration/paid-students', [PaidStudentController::class, 'index'])
-        ->name('api.integration.paid-students');
+    Route::get('/integration/changes', [ChangesController::class, 'index'])
+        ->name('api.integration.changes');
 });

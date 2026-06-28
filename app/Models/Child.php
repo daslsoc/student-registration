@@ -35,6 +35,8 @@ class Child extends Model
         'special_needs',
         'dhamma_class',
         'sinhala_class',
+        'allocated_dhamma_class',
+        'allocated_sinhala_class',
         'student_number',
         'year_of_first_registration',
         'photography_allowed',

@@ -29,6 +29,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/export-csv', [AdminController::class, 'exportCsv'])->name('admin.export_csv');
     Route::get('/admin/import-csv', [RegistrationController::class, 'showImportCsvForm'])->name('admin.show_import_csv');
     Route::post('/admin/import-csv', [RegistrationController::class, 'handleCsvImport'])->name('admin.import_csv');
+    Route::get('/admin/unallocated', [AdminController::class, 'showUnallocated'])->name('admin.unallocated');
+    Route::get('/admin/class-relocation', [AdminController::class, 'searchRelocation'])->name('admin.class_relocation');
+    Route::post('/admin/allocations', [AdminController::class, 'updateAllocations'])->name('admin.allocations.update');
 });
 
 // Show the login form (GET)

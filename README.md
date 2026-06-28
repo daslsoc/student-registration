@@ -65,6 +65,33 @@ The app reads school-specific values (name, pricing, minimum child age,
 WhatsApp link, Google Analytics id, Stripe secret) from the environment — see
 the "Custom settings" block in `.env.example` and `config/custom.php`.
 
+## Attendance integration (class allocation + sync API)
+
+When a parent completes payment, each child is **auto-allocated to a class**
+from their day-school year, and the sibling **student-attendance** app pulls
+that allocation to enrol them. This app is the **source of truth** for
+allocations.
+
+- **The rule lives in config** — `config/integration.php` maps each
+  `day_school_year` (Pre School … Grade 12) to a class (`Class A`…`Class E`).
+  Edit the bands there without touching code.
+- **At payment** (`RegistrationController::handleSuccess`), `ClassAllocator`
+  sets `children.allocated_dhamma_class` and `allocated_sinhala_class` (both to
+  the same class initially). The existing `dhamma_class` / `sinhala_class` are
+  left as last-year history.
+- **Admins can override** at `/admin/allocations` (behind login) — for
+  exceptions or moves. Saving bumps `children.updated_at`, which is the sync
+  clock.
+- **The confirmation email** now tells parents the allocated class.
+- **The API** (token-gated via `INTEGRATION_API_TOKEN`):
+  `GET /api/integration/changes?since=<ts>` returns
+  `{ last_changed_at, count, students:[…] }` — the paid children and their
+  allocated classes, filtered to those changed since `?since=` so the attendance
+  app only pulls deltas. No parent/contact/DOB data is exposed.
+
+> Email runs inline in production (`QUEUE_CONNECTION=sync`), so no worker is
+> needed for the confirmation/allocation email.
+
 ## Documentation
 
 - [docs/deployment.md](docs/deployment.md) — production deploy checklist for
