@@ -91,6 +91,35 @@ class ChangesApiTest extends TestCase
         $this->assertNotNull($response->json('last_changed_at'));
     }
 
+    public function test_it_lists_unpaid_students_in_removed(): void
+    {
+        $this->paidChild(['student_number' => 4321, 'first_name' => 'Paid']);
+        $this->unpaidChild(['student_number' => 9999, 'first_name' => 'Gone']);
+
+        $response = $this->getJson($this->endpoint, $this->auth());
+
+        $response->assertStatus(200);
+        // Paid child is in students; the unpaid one is reported for deletion.
+        $response->assertJsonPath('students.0.student_number', '4321');
+        $this->assertSame(['9999'], $response->json('removed'));
+    }
+
+    public function test_removed_respects_since(): void
+    {
+        $old = $this->unpaidChild(['student_number' => 1]);
+        Child::where('id', $old->id)->update(['updated_at' => now()->subDays(2)]);
+
+        $cutoff = now()->subDay()->toDateTimeString();
+
+        $this->unpaidChild(['student_number' => 2]);
+
+        $removed = $this->getJson($this->endpoint.'?since='.urlencode($cutoff), $this->auth())
+            ->json('removed');
+
+        // Only the recently-changed unpaid student is in the delta.
+        $this->assertSame(['2'], $removed);
+    }
+
     public function test_it_does_not_leak_parent_or_contact_fields(): void
     {
         $this->paidChild();

@@ -300,6 +300,19 @@ class AdminController extends Controller
                 // Revert: void the recorded payments and return to pending.
                 $parent->payments()->delete();
                 $parent->update(['registration_status' => ParentModel::STATUS_PENDING]);
+
+                // Clear allocations so the children drop off the attendance
+                // roster on the next sync (they're no longer paid). $child->update
+                // bumps updated_at, which the integration delta uses to surface
+                // the removal.
+                foreach ($parent->children as $child) {
+                    if ($child->allocated_dhamma_class !== null || $child->allocated_sinhala_class !== null) {
+                        $child->update([
+                            'allocated_dhamma_class' => null,
+                            'allocated_sinhala_class' => null,
+                        ]);
+                    }
+                }
             }
 
             $audit = PaymentOverride::create([

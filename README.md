@@ -102,9 +102,15 @@ allocations.
 - **The confirmation email** tells parents the allocated class.
 - **The API** (token-gated via `INTEGRATION_API_TOKEN`):
   `GET /api/integration/changes?since=<ts>` returns
-  `{ last_changed_at, count, students:[…] }` — the paid children and their
-  allocated classes, filtered to those changed since `?since=` so the attendance
-  app only pulls deltas. No parent/contact/DOB data is exposed.
+  `{ last_changed_at, count, students:[…], removed:[…] }`. `students` are the
+  paid children and their allocated classes (the consumer **upserts** these);
+  `removed` are student numbers no longer in the paid roster (the consumer
+  **deletes** these — e.g. after a payment is reverted). Both are filtered to
+  changes since `?since=` so the attendance app only pulls deltas. No
+  parent/contact/DOB data is exposed.
+- **Reverting a payment** (admin Payment Override) voids the payments, returns
+  the family to pending, **and clears the children's allocations** — so they
+  surface in `removed` on the next sync and drop off the attendance roster.
 
 > Email runs inline in production (`QUEUE_CONNECTION=sync`), so no worker is
 > needed for the confirmation/allocation email.

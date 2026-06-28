@@ -95,7 +95,11 @@ class PaymentOverrideTest extends TestCase
     {
         $this->admin();
         $parent = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_COMPLETED]);
-        Child::factory()->create(['parent_id' => $parent->id]);
+        $child = Child::factory()->create([
+            'parent_id' => $parent->id,
+            'allocated_dhamma_class' => 'Class C',
+            'allocated_sinhala_class' => 'Class C',
+        ]);
         Payment::create(['parent_id' => $parent->id, 'amount_paid' => 50, 'paid_date' => now(), 'method' => 'cash']);
 
         $this->post('/admin/payment-override', [
@@ -106,6 +110,11 @@ class PaymentOverrideTest extends TestCase
 
         $this->assertSame(0, Payment::where('parent_id', $parent->id)->count());
         $this->assertSame(ParentModel::STATUS_PENDING, $parent->fresh()->registration_status);
+
+        // Allocations cleared so the child drops off the attendance sync.
+        $child->refresh();
+        $this->assertNull($child->allocated_dhamma_class);
+        $this->assertNull($child->allocated_sinhala_class);
         $this->assertDatabaseHas('payment_overrides', [
             'parent_id' => $parent->id,
             'action' => PaymentOverride::ACTION_REVERTED,
