@@ -14,11 +14,13 @@ services:
       DB_USERNAME: laravel_user
       DB_PASSWORD: secret
 
-      # Redis-based sessions & queue
+      # Redis-based sessions & cache. Mail/queue run synchronously (sync) so
+      # jobs are processed in-request — this mirrors the shared-server
+      # production host, which has no long-running queue worker.
       REDIS_HOST: redis
       CACHE_DRIVER: redis
       SESSION_DRIVER: redis
-      QUEUE_CONNECTION: redis
+      QUEUE_CONNECTION: sync
     networks:
       - laravel_net
 
