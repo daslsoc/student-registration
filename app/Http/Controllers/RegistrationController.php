@@ -207,6 +207,7 @@ class RegistrationController extends Controller
             'parent_id' => $parent->id,
             'amount_paid' => $this->priceForChildCount($parent->children()->count()),
             'paid_date' => now(),
+            'method' => 'online',
         ]);
 
         // 4) Mark as completed

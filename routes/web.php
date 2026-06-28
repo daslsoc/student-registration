@@ -24,7 +24,6 @@ Route::post('/registration/update/{token}', [RegistrationController::class, 'han
 
 // Admin
 Route::middleware('auth')->group(function () {
-    Route::get('/admin/orientation', [AdminController::class, 'showOrientationList'])->name('admin.orientation_list');
     Route::get('/admin/parents-students', [AdminController::class, 'showParentStudentList'])->name('admin.parent_student_list');
     Route::get('/admin/export-csv', [AdminController::class, 'exportCsv'])->name('admin.export_csv');
     Route::get('/admin/import-csv', [RegistrationController::class, 'showImportCsvForm'])->name('admin.show_import_csv');
@@ -33,6 +32,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/unallocated', [AdminController::class, 'showUnallocated'])->name('admin.unallocated');
     Route::get('/admin/class-relocation', [AdminController::class, 'searchRelocation'])->name('admin.class_relocation');
     Route::post('/admin/allocations', [AdminController::class, 'updateAllocations'])->name('admin.allocations.update');
+
+    Route::get('/admin/payment-override', [AdminController::class, 'showPaymentOverride'])->name('admin.payment_override');
+    Route::post('/admin/payment-override', [AdminController::class, 'storePaymentOverride'])->name('admin.payment_override.store');
 });
 
 // Show the login form (GET)

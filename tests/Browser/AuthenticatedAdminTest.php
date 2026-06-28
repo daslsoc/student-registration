@@ -21,10 +21,10 @@ class AuthenticatedAdminTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($admin) {
             $browser->loginAs($admin)
-                ->visit('/admin/orientation')
-                ->assertSee('Orientation List')
                 ->visit('/admin/parents-students')
                 ->assertSee('Child List')
+                ->visit('/admin/payment-override')
+                ->assertSee('Payment Status Override')
                 ->visit('/admin/import-csv')
                 ->assertSee('Import CSV')
                 // CSV export is a file download, not an HTML page — visiting it

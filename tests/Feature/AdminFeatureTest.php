@@ -42,4 +42,27 @@ class AdminFeatureTest extends TestCase
         $response->assertSee('Parent & Child List'); // from parent_child_list.blade.php h1
         $response->assertSee('AdminTest Parent');
     }
+
+    public function test_the_status_filter_narrows_the_list(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $completed = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_COMPLETED]);
+        Child::factory()->create(['parent_id' => $completed->id, 'first_name' => 'Completed', 'last_name' => 'Kid']);
+
+        $pending = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_PENDING]);
+        Child::factory()->create(['parent_id' => $pending->id, 'first_name' => 'Pending', 'last_name' => 'Kid']);
+
+        // Both by default.
+        $this->get('/admin/parents-students')
+            ->assertSee('Completed Kid')->assertSee('Pending Kid');
+
+        // Completed only.
+        $this->get('/admin/parents-students?status=completed')
+            ->assertSee('Completed Kid')->assertDontSee('Pending Kid');
+
+        // Pending only.
+        $this->get('/admin/parents-students?status=pending')
+            ->assertSee('Pending Kid')->assertDontSee('Completed Kid');
+    }
 }

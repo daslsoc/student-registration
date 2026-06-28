@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Mail\ClassAllocationChanged;
 use App\Models\Child;
 use App\Models\ParentModel;
+use App\Models\Payment;
+use App\Models\PaymentOverride;
 use App\Services\ClassAllocator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -24,20 +28,19 @@ class AdminController extends Controller
      *
      * @return View
      */
-    public function showParentStudentList()
+    public function showParentStudentList(Request $request)
     {
-        $parents = ParentModel::with('children')->get();
-        Log::info('Admin viewing parent & child list');
+        // Filter by registration status: completed, pending, or all (default).
+        $status = $request->query('status', 'all');
+        $allowed = [ParentModel::STATUS_COMPLETED, ParentModel::STATUS_PENDING];
 
-        return view('admin.parent_child_list', compact('parents'));
-    }
+        $parents = ParentModel::with('children')
+            ->when(in_array($status, $allowed, true), fn ($q) => $q->where('registration_status', $status))
+            ->get();
 
-    public function showOrientationList()
-    {
-        $parents = ParentModel::with('children')->get();
-        Log::info('Admin viewing orientation list');
+        Log::info('Admin viewing parent & child list', ['status' => $status]);
 
-        return view('admin.orientation_list', compact('parents'));
+        return view('admin.parent_child_list', compact('parents', 'status'));
     }
 
     /**
@@ -215,6 +218,131 @@ class AdminController extends Controller
         }
 
         return $recipients !== [];
+    }
+
+    /**
+     * Manual payment-status override screen. Used when a family pays by cash or
+     * eftpos at the desk (mark as paid), or to correct a mistake (revert). Lists
+     * families with their current status and shows the recent audit trail.
+     */
+    public function showPaymentOverride(Request $request)
+    {
+        $parents = ParentModel::withCount('children')
+            ->with(['payments' => fn ($q) => $q->whereNotNull('paid_date')])
+            ->orderBy('parent1_last_name')
+            ->get();
+
+        $recentOverrides = PaymentOverride::with('parent:id,parent1_first_name,parent1_last_name')
+            ->latest()
+            ->limit(25)
+            ->get();
+
+        return view('admin.payment_override', compact('parents', 'recentOverrides'));
+    }
+
+    /**
+     * Apply a payment-status override and write an immutable audit row. Marking
+     * paid records a cash/eftpos Payment, completes the registration, and
+     * allocates the children (same as an online payment, minus the emails).
+     * Reverting voids the payments and returns the family to pending. All of it
+     * runs in one transaction.
+     */
+    public function storePaymentOverride(Request $request, ClassAllocator $allocator)
+    {
+        $validated = $request->validate([
+            'parent_id' => ['required', 'integer', 'exists:parents,id'],
+            'action' => ['required', Rule::in([PaymentOverride::ACTION_MARKED_PAID, PaymentOverride::ACTION_REVERTED])],
+            'method' => [
+                'nullable',
+                Rule::requiredIf($request->input('action') === PaymentOverride::ACTION_MARKED_PAID),
+                Rule::in(PaymentOverride::methods()),
+            ],
+            'amount' => ['nullable', 'numeric', 'min:0'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $parent = ParentModel::with('children')->findOrFail($validated['parent_id']);
+        $previousStatus = $parent->registration_status;
+        $markPaid = $validated['action'] === PaymentOverride::ACTION_MARKED_PAID;
+
+        DB::transaction(function () use ($parent, $validated, $markPaid, $allocator, $previousStatus) {
+            $amount = null;
+
+            if ($markPaid) {
+                // A waived fee completes the registration at $0; cash/eftpos use
+                // the entered amount or fall back to the standard fee.
+                $amount = $validated['amount']
+                    ?? ($validated['method'] === PaymentOverride::METHOD_WAIVED
+                        ? 0
+                        : $this->priceForChildCount($parent->children->count()));
+
+                Payment::create([
+                    'parent_id' => $parent->id,
+                    'amount_paid' => $amount,
+                    'paid_date' => now(),
+                    'method' => $validated['method'],
+                ]);
+
+                $parent->update(['registration_status' => ParentModel::STATUS_COMPLETED]);
+
+                // Allocate each child from their day-school year, like the online
+                // flow, so attendance enrols them on the next sync.
+                foreach ($parent->children as $child) {
+                    $class = $allocator->classForGrade($child->day_school_year);
+                    if ($class !== null) {
+                        $child->update([
+                            'allocated_dhamma_class' => $class,
+                            'allocated_sinhala_class' => $class,
+                        ]);
+                    }
+                }
+            } else {
+                // Revert: void the recorded payments and return to pending.
+                $parent->payments()->delete();
+                $parent->update(['registration_status' => ParentModel::STATUS_PENDING]);
+            }
+
+            $audit = PaymentOverride::create([
+                'parent_id' => $parent->id,
+                'user_id' => Auth::id(),
+                'performed_by' => Auth::user()?->name,
+                'action' => $validated['action'],
+                'method' => $markPaid ? $validated['method'] : null,
+                'amount' => $amount,
+                'previous_status' => $previousStatus,
+                'new_status' => $parent->registration_status,
+                'note' => $validated['note'] ?? null,
+            ]);
+        });
+
+        Log::info('Payment status overridden', [
+            'parent_id' => $parent->id,
+            'action' => $validated['action'],
+            'method' => $markPaid ? $validated['method'] : null,
+            'by_user_id' => Auth::id(),
+        ]);
+
+        $name = trim($parent->parent1_first_name.' '.$parent->parent1_last_name);
+        if (! $markPaid) {
+            $message = "Reverted {$name} to pending and voided their payments.";
+        } elseif ($validated['method'] === PaymentOverride::METHOD_WAIVED) {
+            $message = "Waived the fee for {$name} — registration completed.";
+        } else {
+            $message = "Recorded {$validated['method']} payment for {$name} — registration completed.";
+        }
+
+        return redirect()->route('admin.payment_override')->with('status', $message);
+    }
+
+    /**
+     * The registration fee for a given number of children (same rule as the
+     * online checkout). Pricing lives in config/custom.php.
+     */
+    private function priceForChildCount(int $childCount): float
+    {
+        return (float) ($childCount > 1
+            ? config('custom.pricing.multiple_children')
+            : config('custom.pricing.single_child'));
     }
 
     public function exportCsv()

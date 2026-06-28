@@ -22,6 +22,7 @@ class Payment extends Model
         'parent_id',
         'amount_paid',
         'paid_date',
+        'method',
     ];
 
     /**
