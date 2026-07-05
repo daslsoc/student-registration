@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 // Public
 Route::get('/', [HomeController::class, 'home']);
 Route::get('/guidelines', [HomeController::class, 'guidelines'])->name('guidelines');
+Route::get('/help', [HelpController::class, 'parent'])->name('help');
 Route::get('/registration', [RegistrationController::class, 'showRegistrationForm'])->name('registration.form');
 Route::post('/registration', [RegistrationController::class, 'handleRegistration'])
     ->middleware('throttle:10,1')
@@ -35,6 +37,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/payment-override', [AdminController::class, 'showPaymentOverride'])->name('admin.payment_override');
     Route::post('/admin/payment-override', [AdminController::class, 'storePaymentOverride'])->name('admin.payment_override.store');
+
+    Route::get('/admin/help', [HelpController::class, 'admin'])->name('admin.help');
 });
 
 // Show the login form (GET)

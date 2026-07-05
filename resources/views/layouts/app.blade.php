@@ -44,6 +44,7 @@
           <a class="nav-link {{ request()->routeIs('registration.form') ? 'active' : '' }}" @if(request()->routeIs('registration.form')) aria-current="page" @endif href="{{route('registration.form')}}">Register New Family</a>
           <a class="nav-link {{ request()->routeIs('registration.retrieve') ? 'active' : '' }}" @if(request()->routeIs('registration.retrieve')) aria-current="page" @endif href="{{route('registration.retrieve')}}">Update Existing Registration</a>
           <a class="nav-link {{ request()->routeIs('guidelines') ? 'active' : '' }}" @if(request()->routeIs('guidelines')) aria-current="page" @endif href="{{route('guidelines')}}">Guidelines</a>
+          <a class="nav-link {{ request()->routeIs('help') ? 'active' : '' }}" @if(request()->routeIs('help')) aria-current="page" @endif href="{{route('help')}}">Help</a>
           @if (Auth::check())
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -56,6 +57,8 @@
               <a class="dropdown-item" href="{{route('admin.unallocated')}}">Unallocated Students</a>
               <a class="dropdown-item" href="{{route('admin.payment_override')}}">Payment Override</a>
               <a class="dropdown-item" href="{{route('admin.show_import_csv')}}">Import CSV</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="{{route('admin.help')}}">Help &amp; Guide</a>
             </div>
           </div>
           @endif

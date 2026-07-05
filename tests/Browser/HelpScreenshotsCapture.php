@@ -13,7 +13,8 @@ use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
 /**
- * Captures the screenshots used by the user guides in docs/guides. This is a
+ * Captures the screenshots shown on the in-app Help pages
+ * (resources/views/help/parent.blade.php and admin.blade.php). This is a
  * documentation tool, NOT a regression test.
  *
  * It is guarded by an env flag so it never runs (and never overwrites the
@@ -21,15 +22,15 @@ use Tests\DuskTestCase;
  * the images, bring up the Dusk stack and run it explicitly:
  *
  *   make dusk-up
- *   DOCS_SCREENSHOTS=1 make dusk ARGS="tests/Browser/DocsScreenshotsCapture.php"
+ *   DOCS_SCREENSHOTS=1 make dusk ARGS="tests/Browser/HelpScreenshotsCapture.php"
  *   make dusk-down
  *
- * Each shot is written straight into docs/guides/images/<audience>/<name>.png,
- * exactly where the markdown references it — no copy step. Filenames match the
- * ![alt](images/...) links in parent-guide.md / admin-guide.md; keep them in
- * sync if you rename a shot.
+ * Each shot is written straight into public/images/help/<audience>/<name>.png,
+ * exactly where the Help pages' <img src="/images/help/..."> reference it — no
+ * copy step. Filenames must stay in sync with the Help blades if you rename a
+ * shot.
  */
-class DocsScreenshotsCapture extends DuskTestCase
+class HelpScreenshotsCapture extends DuskTestCase
 {
     use DatabaseMigrations;
 
@@ -140,11 +141,11 @@ class DocsScreenshotsCapture extends DuskTestCase
     }
 
     /**
-     * Write the current viewport to docs/guides/images/<relativePath>.
+     * Write the current viewport to public/images/help/<relativePath>.
      */
     private function capture(Browser $browser, string $relativePath): void
     {
-        $absolute = base_path('docs/guides/images/'.$relativePath);
+        $absolute = public_path('images/help/'.$relativePath);
         File::ensureDirectoryExists(dirname($absolute));
 
         file_put_contents($absolute, $browser->driver->takeScreenshot());
@@ -156,7 +157,7 @@ class DocsScreenshotsCapture extends DuskTestCase
      */
     private function captureElement(Browser $browser, string $selector, string $relativePath): void
     {
-        $absolute = base_path('docs/guides/images/'.$relativePath);
+        $absolute = public_path('images/help/'.$relativePath);
         File::ensureDirectoryExists(dirname($absolute));
 
         $browser->scrollIntoView($selector)->pause(300);
