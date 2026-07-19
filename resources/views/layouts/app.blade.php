@@ -14,19 +14,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title', 'Dhamma and Sinhala Language School Registration')</title>
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  @include('partials.favicons')
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
-
-  <!-- Any additional CSS can go here -->
-
-  <!-- App JS bundle (axios + registration form behaviour). Loaded as a
-       deferred module, so it runs after the DOM is parsed. -->
-  @vite(['resources/js/app.js'])
+  <!-- Bootstrap 5 (CSS + JS) and the app's own registration-form behaviour, all
+       bundled by Vite rather than pulled from a CDN. Loaded as a deferred
+       module, so it runs after the DOM is parsed. -->
+  @vite(['resources/scss/app.scss', 'resources/js/app.js'])
 </head>
 
 <body>
@@ -105,8 +98,7 @@
     </div>
   </footer>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {{-- Bootstrap's own JS now ships in the Vite bundle (see resources/js/app.js). --}}
   @if(config('custom.tracking.google_analytics_id'))
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('custom.tracking.google_analytics_id') }}"></script>
