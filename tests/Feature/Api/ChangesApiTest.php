@@ -29,7 +29,10 @@ class ChangesApiTest extends TestCase
 
     private function paidChild(array $childAttributes = []): Child
     {
-        $parent = ParentModel::factory()->create();
+        // Paying sets BOTH the status and the payment row (see handleSuccess).
+        $parent = ParentModel::factory()->create([
+            'registration_status' => ParentModel::STATUS_COMPLETED,
+        ]);
         Payment::create([
             'parent_id' => $parent->id,
             'amount_paid' => 50,
@@ -45,7 +48,27 @@ class ChangesApiTest extends TestCase
 
     private function unpaidChild(array $childAttributes = []): Child
     {
-        $parent = ParentModel::factory()->create();
+        $parent = ParentModel::factory()->create([
+            'registration_status' => ParentModel::STATUS_PENDING,
+        ]);
+
+        return Child::factory()->create(array_merge(['parent_id' => $parent->id], $childAttributes));
+    }
+
+    /**
+     * A family that paid LAST year and hasn't renewed: the annual reset flips
+     * them back to pending but keeps the old payment row on file.
+     */
+    private function lastYearPayerChild(array $childAttributes = []): Child
+    {
+        $parent = ParentModel::factory()->create([
+            'registration_status' => ParentModel::STATUS_PENDING,
+        ]);
+        Payment::create([
+            'parent_id' => $parent->id,
+            'amount_paid' => 50,
+            'paid_date' => now()->subYear(),
+        ]);
 
         return Child::factory()->create(array_merge(['parent_id' => $parent->id], $childAttributes));
     }
@@ -102,6 +125,24 @@ class ChangesApiTest extends TestCase
         // Paid child is in students; the unpaid one is reported for deletion.
         $response->assertJsonPath('students.0.student_number', '4321');
         $this->assertSame(['9999'], $response->json('removed'));
+    }
+
+    public function test_a_family_who_paid_last_year_but_has_not_renewed_is_removed(): void
+    {
+        // The regression this guards: "paid" used to mean "has any payment with
+        // a paid_date", so last year's payers stayed on the roster forever and
+        // never appeared in `removed` after the annual reset.
+        $this->paidChild(['student_number' => 4321, 'first_name' => 'Renewed']);
+        $this->lastYearPayerChild(['student_number' => 8888, 'first_name' => 'NotReturning']);
+
+        $response = $this->getJson($this->endpoint, $this->auth());
+
+        $response->assertStatus(200);
+        // Only the family who paid for THIS year is on the active roster...
+        $this->assertSame(['4321'], collect($response->json('students'))->pluck('student_number')->all());
+        $this->assertSame(1, $response->json('count'));
+        // ...and last year's payer is signalled for removal.
+        $this->assertSame(['8888'], $response->json('removed'));
     }
 
     public function test_removed_respects_since(): void

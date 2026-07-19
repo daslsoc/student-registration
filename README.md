@@ -105,9 +105,17 @@ allocations.
   `{ last_changed_at, count, students:[…], removed:[…] }`. `students` are the
   paid children and their allocated classes (the consumer **upserts** these);
   `removed` are student numbers no longer in the paid roster (the consumer
-  **deletes** these — e.g. after a payment is reverted). Both are filtered to
-  changes since `?since=` so the attendance app only pulls deltas. No
-  parent/contact/DOB data is exposed.
+  **deletes** these — e.g. after a payment is reverted, or a family who didn't
+  renew). Both are filtered to changes since `?since=` so the attendance app
+  only pulls deltas. No parent/contact/DOB data is exposed.
+- **"Paid" means paid for the _current_ year.** Families pay annually and the
+  annual reset (see [docs/operations.md](docs/operations.md)) flips
+  `parents.registration_status` back to `pending` while **keeping** payment
+  history — so "has any payment with a `paid_date`" would treat last year's
+  families as paid forever. Everything that asks "has this family paid?" goes
+  through `Child::scopePaid()` / `scopeUnpaid()`, which scope on
+  `registration_status`. Get this wrong and last year's students never drop off
+  the attendance roster.
 - **Reverting a payment** (admin Payment Override) voids the payments, returns
   the family to pending, **and clears the children's allocations** — so they
   surface in `removed` on the next sync and drop off the attendance roster.

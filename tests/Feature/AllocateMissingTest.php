@@ -14,7 +14,8 @@ class AllocateMissingTest extends TestCase
 
     private function paidChild(array $attributes = []): Child
     {
-        $parent = ParentModel::factory()->create();
+        // Paying sets BOTH the status and the payment row (see handleSuccess).
+        $parent = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_COMPLETED]);
         Payment::create(['parent_id' => $parent->id, 'amount_paid' => 50, 'paid_date' => now()]);
 
         return Child::factory()->create(array_merge([

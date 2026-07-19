@@ -31,13 +31,12 @@ class ChangesController extends Controller
     {
         $since = $request->query('since');
 
-        $paid = fn () => Child::query()
-            ->whereNotNull('student_number')
-            ->whereHas('parent.payments', fn ($q) => $q->whereNotNull('paid_date'));
+        // "Paid" means paid for the CURRENT year — see Child::scopePaid(). A
+        // family that paid last year but hasn't renewed is unpaid, so they
+        // surface in `removed` and drop off the attendance roster.
+        $paid = fn () => Child::query()->whereNotNull('student_number')->paid();
 
-        $unpaid = fn () => Child::query()
-            ->whereNotNull('student_number')
-            ->whereDoesntHave('parent.payments', fn ($q) => $q->whereNotNull('paid_date'));
+        $unpaid = fn () => Child::query()->whereNotNull('student_number')->unpaid();
 
         // High-water mark across every known student, so a child going unpaid
         // (a removal) advances the consumer's `since` just like an addition.

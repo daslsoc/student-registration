@@ -17,7 +17,8 @@ class AdminAllocationTest extends TestCase
 
     private function paidChild(array $attributes = []): Child
     {
-        $parent = ParentModel::factory()->create();
+        // Paying sets BOTH the status and the payment row (see handleSuccess).
+        $parent = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_COMPLETED]);
         Payment::create(['parent_id' => $parent->id, 'amount_paid' => 50, 'paid_date' => now()]);
 
         return Child::factory()->create(array_merge(['parent_id' => $parent->id], $attributes));
@@ -79,6 +80,7 @@ class AdminAllocationTest extends TestCase
         $parent = ParentModel::factory()->create([
             'parent1_email' => 'p1@example.com',
             'parent2_email' => 'p2@example.com',
+            'registration_status' => ParentModel::STATUS_COMPLETED,
         ]);
         Payment::create(['parent_id' => $parent->id, 'amount_paid' => 50, 'paid_date' => now()]);
         Child::factory()->create([
@@ -155,6 +157,30 @@ class AdminAllocationTest extends TestCase
         $this->get(route('admin.unallocated'))
             ->assertStatus(200)
             ->assertSee('Paidbut');
+    }
+
+    public function test_unallocated_page_hides_a_family_who_only_paid_last_year(): void
+    {
+        // The annual reset flips everyone back to pending but keeps payment
+        // history. A "has any payment" test would wrongly list last year's
+        // families here, inviting an admin to give a class to someone who
+        // hasn't paid for the current year.
+        $this->actingAs(User::factory()->create());
+
+        $parent = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_PENDING]);
+        Payment::create(['parent_id' => $parent->id, 'amount_paid' => 50, 'paid_date' => now()->subYear()]);
+        Child::factory()->create([
+            'parent_id' => $parent->id,
+            'first_name' => 'Lastyear',
+            'last_name' => 'Payer',
+            'student_number' => 7009,
+            'allocated_dhamma_class' => null,
+            'allocated_sinhala_class' => null,
+        ]);
+
+        $this->get(route('admin.unallocated'))
+            ->assertStatus(200)
+            ->assertDontSee('Lastyear');
     }
 
     public function test_unallocated_page_hides_fully_allocated_students(): void

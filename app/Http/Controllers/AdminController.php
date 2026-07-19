@@ -88,7 +88,7 @@ class AdminController extends Controller
     {
         $children = Child::query()
             ->whereNotNull('student_number')
-            ->whereHas('parent.payments', fn ($q) => $q->whereNotNull('paid_date'))
+            ->paid() // paid for the current year — see Child::scopePaid()
             ->where(function ($q) {
                 $q->whereNull('allocated_dhamma_class')
                     ->orWhereNull('allocated_sinhala_class');

@@ -25,12 +25,12 @@ class AllocateMissing extends Command
         $dryRun = (bool) $this->option('dry-run');
 
         // Same "paid" definition as the integration API: a student_number set
-        // and a parent payment with a paid_date. Only those missing a Buddhism
-        // allocation are candidates.
+        // and a family that has paid for the CURRENT year (Child::scopePaid()).
+        // Only those missing a Buddhism allocation are candidates.
         $candidates = Child::query()
             ->whereNotNull('student_number')
             ->whereNull('allocated_dhamma_class')
-            ->whereHas('parent.payments', fn ($q) => $q->whereNotNull('paid_date'))
+            ->paid()
             ->orderBy('student_number')
             ->get();
 

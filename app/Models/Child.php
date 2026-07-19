@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -70,5 +71,36 @@ class Child extends Model
     public function age()
     {
         return Carbon::parse($this->attributes['date_of_birth'])->age;
+    }
+
+    /**
+     * Children whose family has paid for the CURRENT school year.
+     *
+     * Families pay every year. The annual reset (docs/operations.md) flips
+     * `parents.registration_status` back to `pending` but deliberately KEEPS
+     * payment history, so a "has any payment with a paid_date" test would count
+     * last year's payers as paid forever — putting non-returning students on the
+     * allocation worklist and keeping them on the attendance roster. The
+     * registration status is the per-year truth, so scope on that.
+     */
+    public function scopePaid(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'parent',
+            fn ($q) => $q->where('registration_status', ParentModel::STATUS_COMPLETED)
+        );
+    }
+
+    /**
+     * Children whose family has NOT paid for the current school year — the
+     * inverse of {@see scopePaid()}. Includes last year's families after the
+     * annual reset, which is what makes them show up as removals in the sync.
+     */
+    public function scopeUnpaid(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'parent',
+            fn ($q) => $q->where('registration_status', '!=', ParentModel::STATUS_COMPLETED)
+        );
     }
 }
