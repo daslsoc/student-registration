@@ -4,18 +4,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Integration API token
+    | Integration API tokens (one per consuming app)
     |--------------------------------------------------------------------------
     |
-    | A long random shared secret. The sibling student-attendance app sends it
-    | as a Bearer token to read the integration API. If this is empty the API
-    | denies every request (fail closed), so set it in production.
+    | Long random shared secrets. Each sibling app that reads this API gets its
+    | OWN token, so one can be rotated or revoked without breaking the others,
+    | and so a log line can name which app called.
+    |
+    |   attendance — student-attendance, reads paid students (/integration/changes)
+    |   tea-roster — tea-roster, reads parent contacts  (/integration/parents)
+    |
+    | An empty/unset token never matches, so an app you haven't set up yet is
+    | denied rather than accidentally allowed. If none are set the API denies
+    | every request (fail closed).
     |
     | Generate one with: openssl rand -hex 32   (or any 32+ byte random string)
     |
     */
 
-    'api_token' => env('INTEGRATION_API_TOKEN'),
+    'api_tokens' => [
+        'attendance' => env('INTEGRATION_API_TOKEN'),
+        'tea-roster' => env('INTEGRATION_API_TOKEN_TEA_ROSTER'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

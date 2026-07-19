@@ -19,7 +19,7 @@ class ChangesApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['integration.api_token' => $this->token]);
+        config(['integration.api_tokens' => ['attendance' => $this->token]]);
     }
 
     private function auth(): array
