@@ -6,7 +6,7 @@ notifications, and administrative features (lists, CSV import/export).
 
 ## Stack
 
-- **Laravel 12** (PHP 8.2)
+- **Laravel 13** (PHP 8.3)
 - **PHP-FPM + Nginx**, **MySQL 8**, **Redis** (cache/session/queue), and a
   **queue worker** — all via Docker Compose.
 - **Vite + Tailwind** for assets, **Stripe** for payments.
