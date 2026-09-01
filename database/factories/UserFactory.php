@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +21,11 @@ class UserFactory extends Factory
     /**
      * Define the model's default state.
      *
+     * Users default to the Administrator role (seeded by the roles migration),
+     * so a plain User::factory() behaves the way every user did before roles
+     * existed: full access. Tests that care about permissions opt into a
+     * narrower role with ->withAtoms([...]) or ->inRole($role).
+     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -30,6 +36,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role_id' => fn () => Role::where('name', 'Administrator')->value('id'),
         ];
     }
 
@@ -41,5 +48,32 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Put the user in a brand new role carrying exactly these atoms.
+     *
+     * @param  list<string>  $atoms
+     */
+    public function withAtoms(array $atoms): static
+    {
+        return $this->state(fn () => [
+            'role_id' => Role::factory()->withAtoms($atoms)->create()->id,
+        ]);
+    }
+
+    public function inRole(Role $role): static
+    {
+        return $this->state(fn () => ['role_id' => $role->id]);
+    }
+
+    public function roleless(): static
+    {
+        return $this->state(fn () => ['role_id' => null]);
+    }
+
+    public function deactivated(): static
+    {
+        return $this->state(fn () => ['deactivated_at' => now()]);
     }
 }

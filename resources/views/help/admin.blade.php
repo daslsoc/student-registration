@@ -22,6 +22,9 @@
           <li><a href="#relocation">Class Relocation</a></li>
           <li><a href="#override">Payment Override</a></li>
           <li><a href="#import">Import &amp; Export CSV</a></li>
+          <li><a href="#users">Users — adding &amp; removing staff</a></li>
+          <li><a href="#roles">Roles &amp; permissions</a></li>
+          <li><a href="#audit">Audit log</a></li>
         </ol>
       </div>
     </div>
@@ -29,7 +32,9 @@
     {{-- 1. Login --}}
     <section id="login" class="mb-5">
       <h2 class="h3">1. Logging in</h2>
-      <p>Admin pages are private. Click <strong>Login</strong> (top-right) and sign in with your staff email and password. There is <strong>no self-sign-up</strong> — staff accounts are created for you by whoever runs the system. Once you're in, an <strong>Admin</strong> menu appears in the top bar; click <strong>Logout</strong> when you're finished.</p>
+      <p>Admin pages are private. Click <strong>Login</strong> (top-right) and sign in with your staff email and password. There is <strong>no self-sign-up</strong> — staff accounts are created by an administrator on the <a href="#users">Users</a> page. Once you're in, an <strong>Admin</strong> menu appears in the top bar; click <strong>Logout</strong> when you're finished.</p>
+      <p><strong>Forgotten your password?</strong> Click <em>Forgot your password?</em> under the login form and enter your email. A link arrives by email that lets you set a new one; it works <strong>once</strong> and expires after <strong>60 minutes</strong>. If nothing arrives, check your junk folder and confirm the address on your account with an administrator — for safety the page says the same thing whether or not the address is registered, so it can't be used to fish for staff emails.</p>
+      <p>What you see in the <strong>Admin</strong> menu depends on your <a href="#roles">role</a>. If a page you expect is missing, your role doesn't include it — ask an administrator.</p>
       <figure class="figure w-100">
         <img src="/images/help/admin/login.png" class="figure-img img-fluid rounded border shadow-sm" alt="The admin login page with email and password boxes.">
         <figcaption class="figure-caption">The login page — administrators only.</figcaption>
@@ -144,8 +149,41 @@ ChildNAllergies, ChildNSpecialNeeds, ChildNStudentNumber, ChildNPhotographyAllow
       </div>
     </section>
 
+    {{-- 9. Users --}}
+    <section id="users" class="mb-5">
+      <h2 class="h3">9. Users — adding &amp; removing staff</h2>
+      <p><strong>Admin → Users</strong> lists everyone who can sign in, with their role and whether the account is active. You only see this page if your role includes <em>Add, edit &amp; deactivate users</em>.</p>
+      <p><strong>To add someone:</strong> click <strong>Add user</strong>, enter their name and email, set an initial password, and choose a <a href="#roles">role</a>. Hand them the password — they can change it themselves any time with <em>Forgot your password?</em> on the login page.</p>
+      <p><strong>To remove someone:</strong> click <strong>Deactivate</strong> on their row. They're signed out immediately, can no longer log in, and can't reset their password. Their account is <strong>not</strong> deleted, on purpose: the audit log needs to keep naming a real person. If it was a mistake, <strong>Reactivate</strong> puts them straight back.</p>
+      <div class="alert alert-warning">
+        Two things the system won't let you do, to stop the school being locked out of its own records: you can't deactivate <strong>your own</strong> account, and you can't remove the <strong>last</strong> account that can manage users. Give someone else that permission first.
+      </div>
+      <p>To move someone between roles — say a helper becomes a registrar — click <strong>Edit</strong> and change the role there. Renames and role changes are recorded in the <a href="#audit">audit log</a> as separate entries.</p>
+    </section>
+
+    {{-- 10. Roles --}}
+    <section id="roles" class="mb-5">
+      <h2 class="h3">10. Roles &amp; permissions</h2>
+      <p>A <strong>role</strong> is a named set of permissions, and every user holds exactly one. Change a role and everyone in it changes with it, immediately — nobody has to log out and back in.</p>
+      <p>Three roles come set up:</p>
+      <ul>
+        <li><strong>Administrator</strong> — everything, including users, roles and the audit log.</li>
+        <li><strong>Registrar</strong> — the day-to-day work: the lists, allocations, payment overrides, import and export. No user or role management.</li>
+        <li><strong>Read-only</strong> — can look at registrations and export them, but change nothing.</li>
+      </ul>
+      <p><strong>Admin → Roles &amp; Permissions</strong> shows each role, how many permissions it carries, and how many people hold it (click the number to see them). <strong>Edit</strong> opens a tick-box grid grouped by area — Registrations, Class allocations, Payments, Administration — where you turn each permission on or off. <strong>Add role</strong> creates a new one from scratch if none of the three fit.</p>
+      <p>A role can only be deleted once nobody holds it, so move its members somewhere else first. And, as with users, the system refuses an edit that would leave nobody able to manage users.</p>
+    </section>
+
+    {{-- 11. Audit log --}}
+    <section id="audit" class="mb-5">
+      <h2 class="h3">11. Audit log</h2>
+      <p><strong>Admin → Audit Log</strong> records every account and permission change: who added a user, who deactivated one, who moved somebody between roles, and exactly which permissions a role gained or lost. Each entry shows when it happened, who did it, and the before/after detail.</p>
+      <p>The log is append-only — there's no way to edit or delete an entry from inside the app, which is what makes it worth having. Filter by action if you're looking for something specific.</p>
+    </section>
+
     <hr>
-    <p class="text-muted">Need to add a staff login, run a report, or reset the year? Those are one-off jobs for whoever runs the system — see the operations notes in the project's <code>docs/</code> folder.</p>
+    <p class="text-muted">Need to run a report or reset the year? Those are one-off jobs for whoever runs the system — see the operations notes in the project's <code>docs/</code> folder.</p>
 
   </div>
 </div>

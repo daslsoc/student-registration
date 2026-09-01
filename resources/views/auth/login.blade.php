@@ -66,5 +66,6 @@
   </div>
 
   <button type="submit" class="btn btn-primary">Login</button>
+  <a href="{{ route('password.request') }}" class="btn btn-link">Forgot your password?</a>
 </form>
 @endsection

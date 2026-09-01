@@ -43,13 +43,40 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Admin
             </a>
+            {{-- Each link is shown only to roles that carry the matching
+                 permission — the routes enforce the same atoms server-side, so
+                 hiding a link is convenience, not the control. --}}
             <div class="dropdown-menu">
+              @can('view_registrations')
               <a class="dropdown-item" href="{{route('admin.parent_student_list')}}">Parents & Child List</a>
+              @endcan
+              @can('view_allergies')
               <a class="dropdown-item" href="{{route('admin.allergies')}}">Allergies &amp; Medical</a>
+              @endcan
+              @can('manage_allocations')
               <a class="dropdown-item" href="{{route('admin.class_relocation')}}">Class Relocation</a>
+              @endcan
+              @can('view_unallocated')
               <a class="dropdown-item" href="{{route('admin.unallocated')}}">Unallocated Students</a>
+              @endcan
+              @can('manage_payment_overrides')
               <a class="dropdown-item" href="{{route('admin.payment_override')}}">Payment Override</a>
+              @endcan
+              @can('import_registrations')
               <a class="dropdown-item" href="{{route('admin.show_import_csv')}}">Import CSV</a>
+              @endcan
+              @canany(['manage_users', 'manage_roles', 'view_audit_log'])
+              <div class="dropdown-divider"></div>
+              @can('manage_users')
+              <a class="dropdown-item" href="{{route('admin.users.index')}}">Users</a>
+              @endcan
+              @can('manage_roles')
+              <a class="dropdown-item" href="{{route('admin.roles.index')}}">Roles &amp; Permissions</a>
+              @endcan
+              @can('view_audit_log')
+              <a class="dropdown-item" href="{{route('admin.audit')}}">Audit Log</a>
+              @endcan
+              @endcanany
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="{{route('admin.help')}}">Help &amp; Guide</a>
             </div>
