@@ -8,6 +8,8 @@ use App\Models\StudentNumberTracker;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Stripe\ApiRequestor;
+use Tests\Support\FakeStripeHttpClient;
 use Tests\TestCase;
 
 /**
@@ -45,7 +47,7 @@ class RegistrationFeatureTest extends TestCase
     {
         // Fake Stripe's HTTP layer so the real Checkout-session code path runs offline.
         config(['services.stripe.secret' => 'sk_test_fake']);
-        \Stripe\ApiRequestor::setHttpClient(new \Tests\Support\FakeStripeHttpClient);
+        ApiRequestor::setHttpClient(new FakeStripeHttpClient);
 
         // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
         $user = User::factory()->create();
@@ -98,7 +100,7 @@ class RegistrationFeatureTest extends TestCase
     {
         // Fake Stripe's HTTP layer so the real Checkout-session code path runs offline.
         config(['services.stripe.secret' => 'sk_test_fake']);
-        \Stripe\ApiRequestor::setHttpClient(new \Tests\Support\FakeStripeHttpClient);
+        ApiRequestor::setHttpClient(new FakeStripeHttpClient);
 
         // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
         $user = User::factory()->create();

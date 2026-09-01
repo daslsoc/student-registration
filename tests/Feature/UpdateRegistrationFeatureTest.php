@@ -6,6 +6,8 @@ use App\Models\Child;
 use App\Models\ParentModel;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Stripe\ApiRequestor;
+use Tests\Support\FakeStripeHttpClient;
 use Tests\TestCase;
 
 /**
@@ -78,7 +80,7 @@ class UpdateRegistrationFeatureTest extends TestCase
     {
         // Fake Stripe's HTTP layer so the real Checkout-session code path runs offline.
         config(['services.stripe.secret' => 'sk_test_fake']);
-        \Stripe\ApiRequestor::setHttpClient(new \Tests\Support\FakeStripeHttpClient);
+        ApiRequestor::setHttpClient(new FakeStripeHttpClient);
 
         $parent = ParentModel::factory()->create([
             'update_token' => 'validtoken',
