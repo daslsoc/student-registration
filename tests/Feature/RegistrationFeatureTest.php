@@ -43,9 +43,9 @@ class RegistrationFeatureTest extends TestCase
      */
     public function test_can_submit_single_child_registration()
     {
-        if (! config('services.stripe.secret')) {
-            $this->markTestSkipped('Requires a Stripe API key: the registration flow creates a real Stripe Checkout session.');
-        }
+        // Fake Stripe's HTTP layer so the real Checkout-session code path runs offline.
+        config(['services.stripe.secret' => 'sk_test_fake']);
+        \Stripe\ApiRequestor::setHttpClient(new \Tests\Support\FakeStripeHttpClient);
 
         // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
         $user = User::factory()->create();
@@ -96,9 +96,9 @@ class RegistrationFeatureTest extends TestCase
      */
     public function test_can_submit_multiple_children_registration()
     {
-        if (! config('services.stripe.secret')) {
-            $this->markTestSkipped('Requires a Stripe API key: the registration flow creates a real Stripe Checkout session.');
-        }
+        // Fake Stripe's HTTP layer so the real Checkout-session code path runs offline.
+        config(['services.stripe.secret' => 'sk_test_fake']);
+        \Stripe\ApiRequestor::setHttpClient(new \Tests\Support\FakeStripeHttpClient);
 
         // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
         $user = User::factory()->create();

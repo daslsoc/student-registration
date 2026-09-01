@@ -76,9 +76,9 @@ class UpdateRegistrationFeatureTest extends TestCase
      */
     public function test_can_update_existing_registration()
     {
-        if (! config('services.stripe.secret')) {
-            $this->markTestSkipped('Requires a Stripe API key: the update flow creates a real Stripe Checkout session.');
-        }
+        // Fake Stripe's HTTP layer so the real Checkout-session code path runs offline.
+        config(['services.stripe.secret' => 'sk_test_fake']);
+        \Stripe\ApiRequestor::setHttpClient(new \Tests\Support\FakeStripeHttpClient);
 
         $parent = ParentModel::factory()->create([
             'update_token' => 'validtoken',
