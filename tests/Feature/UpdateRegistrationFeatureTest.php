@@ -76,6 +76,10 @@ class UpdateRegistrationFeatureTest extends TestCase
      */
     public function test_can_update_existing_registration()
     {
+        if (! config('services.stripe.secret')) {
+            $this->markTestSkipped('Requires a Stripe API key: the update flow creates a real Stripe Checkout session.');
+        }
+
         $parent = ParentModel::factory()->create([
             'update_token' => 'validtoken',
             'token_expires_at' => Carbon::now()->addHours(2),

@@ -43,6 +43,10 @@ class RegistrationFeatureTest extends TestCase
      */
     public function test_can_submit_single_child_registration()
     {
+        if (! config('services.stripe.secret')) {
+            $this->markTestSkipped('Requires a Stripe API key: the registration flow creates a real Stripe Checkout session.');
+        }
+
         // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -92,6 +96,10 @@ class RegistrationFeatureTest extends TestCase
      */
     public function test_can_submit_multiple_children_registration()
     {
+        if (! config('services.stripe.secret')) {
+            $this->markTestSkipped('Requires a Stripe API key: the registration flow creates a real Stripe Checkout session.');
+        }
+
         // Create and authenticate a user (bypasses the login form, satisfies auth middleware)
         $user = User::factory()->create();
         $this->actingAs($user);
