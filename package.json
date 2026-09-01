@@ -16,7 +16,7 @@
         "jsdom": "^30.0.1",
         "laravel-vite-plugin": "^1.0",
         "sass": "^1.103.1",
-        "vite": "^6.0",
+        "vite": "^8.2",
         "vitest": "^4.1.8"
     },
     "dependencies": {
