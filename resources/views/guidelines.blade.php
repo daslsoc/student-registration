@@ -595,7 +595,7 @@
         <p>If you are unable to attend on your rostered day, please arrange a replacement <strong>in advance</strong>.</p>
       </li>
       <li>
-        <p>If contact details are required to coordinate swaps, please contact <strong>Dileepa</strong>.</p>
+        <p>If contact details are required to coordinate swaps, please contact <strong>{{ config('custom.contacts.tea_roster_name') ?: 'the tea roster coordinator' }}</strong>.</p>
       </li>
     </ul>
     <p><strong>Items to Be Brought by the Roster Group (Due to Limited Supplies)</strong></p>
@@ -716,7 +716,11 @@
     <p><strong>Contact for Tea Roster Support</strong></p>
     <ul>
       <li>
-        <p>For further information or coordination, please contact <strong>Dileepa</strong> on <strong>0466 535 380</strong> via SMS or WhatsApp.</p>
+        @php
+          $rosterContactName = config('custom.contacts.tea_roster_name') ?: 'the tea roster coordinator';
+          $rosterContactPhone = config('custom.contacts.tea_roster_phone');
+        @endphp
+        <p>For further information or coordination, please contact <strong>{{ $rosterContactName }}</strong>@if ($rosterContactPhone) on <strong>{{ $rosterContactPhone }}</strong> via SMS or WhatsApp@endif.</p>
       </li>
       <li>
         <p>Any serious or repeated breach of rules will be addressed by:</p>
