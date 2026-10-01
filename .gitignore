@@ -40,5 +40,7 @@ auth.json
 /.nova
 /.vscode
 /.zed
-sonar-project.properties
 tests/clover.xml
+
+# local SonarQube scanner artifacts (make sonar)
+.scannerwork/
