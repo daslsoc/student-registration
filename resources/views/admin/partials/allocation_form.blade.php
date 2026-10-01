@@ -20,18 +20,18 @@
                     <th>#</th>
                     <th>Name</th>
                     <th>Day school year</th>
-                    <th>Buddhism class</th>
-                    <th>Sinhala class</th>
+                    <th id="alloc-dhamma-head" scope="col">Buddhism class</th>
+                    <th id="alloc-sinhala-head" scope="col">Sinhala class</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($children as $child)
                     <tr>
                         <td class="text-nowrap">{{ $child->student_number }}</td>
-                        <td class="text-nowrap">{{ $child->first_name }} {{ $child->last_name }}</td>
+                        <td class="text-nowrap" id="alloc-name-{{ $child->student_number }}">{{ $child->first_name }} {{ $child->last_name }}</td>
                         <td class="text-nowrap">{{ $child->day_school_year }}</td>
                         <td>
-                            <select name="allocations[{{ $child->student_number }}][dhamma]" class="form-select form-select-sm" aria-label="Dhamma class for {{ $child->first_name }} {{ $child->last_name }}">
+                            <select name="allocations[{{ $child->student_number }}][dhamma]" class="form-select form-select-sm" aria-labelledby="alloc-dhamma-head alloc-name-{{ $child->student_number }}">
                                 <option value="">— None —</option>
                                 @foreach ($classes as $class)
                                     <option value="{{ $class }}" @selected($child->allocated_dhamma_class === $class)>{{ $class }}</option>
@@ -39,7 +39,7 @@
                             </select>
                         </td>
                         <td>
-                            <select name="allocations[{{ $child->student_number }}][sinhala]" class="form-select form-select-sm" aria-label="Sinhala class for {{ $child->first_name }} {{ $child->last_name }}">
+                            <select name="allocations[{{ $child->student_number }}][sinhala]" class="form-select form-select-sm" aria-labelledby="alloc-sinhala-head alloc-name-{{ $child->student_number }}">
                                 <option value="">— None —</option>
                                 @foreach ($classes as $class)
                                     <option value="{{ $class }}" @selected($child->allocated_sinhala_class === $class)>{{ $class }}</option>
