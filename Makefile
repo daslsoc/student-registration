@@ -82,7 +82,10 @@ coverage: db-up ## Run PHPUnit with HTML coverage. Opens tests/coverage/index.ht
 
 .PHONY: js-test
 js-test: ## Run JS (Vitest) tests against tests/js/
-	npm run test
+	# laravel-vite-plugin refuses to start whenever CI is set (it assumes a dev
+	# server); Vitest only needs the config, so bypass the check the way
+	# .github/workflows/tests.yml and the nightly sonar sweep do.
+	LARAVEL_BYPASS_ENV_CHECK=1 npm run test
 
 .PHONY: js-test-watch
 js-test-watch: ## Run Vitest in watch mode
@@ -90,7 +93,7 @@ js-test-watch: ## Run Vitest in watch mode
 
 .PHONY: js-coverage
 js-coverage: ## Run Vitest with v8 HTML coverage. Opens tests/js-coverage/index.html.
-	npm run test:coverage
+	LARAVEL_BYPASS_ENV_CHECK=1 npm run test:coverage
 	@echo ""
 	@echo "JS coverage report: file://$(PWD)/tests/js-coverage/index.html"
 
@@ -187,7 +190,7 @@ mysql: ## Open mysql client. Defaults to laravel_db; override with DB=student_re
 .PHONY: sonar
 sonar: db-up ## Regenerate coverage and push a scan to local SonarQube (http://localhost:9000)
 	$(DC) run --rm -e XDEBUG_MODE=coverage app vendor/bin/phpunit --coverage-clover tests/clover.xml
-	npm run test:coverage
+	LARAVEL_BYPASS_ENV_CHECK=1 npm run test:coverage
 	docker run --rm --network host -u "$$(id -u):$$(id -g)" \
 		-e SONAR_HOST_URL=http://localhost:9000 \
 		-e SONAR_TOKEN=$$(awk '/^scanner_token:/{print $$2}' $$HOME/workspace/sonarqube/.admin-credentials) \
