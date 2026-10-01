@@ -224,9 +224,9 @@
         <!-- The first child-block (index 0) -->
         <div class="child-block mb-4">
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Child First Name</label>
+                <label for="child_0_first_name" class="col-sm-3 col-form-label">Child First Name</label>
                 <div class="col-sm-7">
-                    <input type="text"
+                    <input id="child_0_first_name" type="text"
                         class="form-control @error('children.0.first_name') is-invalid @enderror"
                         name="children[0][first_name]"
                         value="{{ old('children.0.first_name') }}"
@@ -238,9 +238,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Child Last Name</label>
+                <label for="child_0_last_name" class="col-sm-3 col-form-label">Child Last Name</label>
                 <div class="col-sm-7">
-                    <input type="text"
+                    <input id="child_0_last_name" type="text"
                         class="form-control @error('children.0.last_name') is-invalid @enderror"
                         name="children[0][last_name]"
                         value="{{ old('children.0.last_name') }}"
@@ -252,9 +252,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Gender</label>
+                <label for="child_0_gender" class="col-sm-3 col-form-label">Gender</label>
                 <div class="col-sm-2">
-                    <select class="form-select @error('children.0.gender') is-invalid @enderror"
+                    <select id="child_0_gender" class="form-select @error('children.0.gender') is-invalid @enderror"
                         name="children[0][gender]"
                         required>
                         <option value="Male" {{ old('children.0.gender') == 'Male'   ? 'selected' : '' }}>Male</option>
@@ -267,9 +267,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Date of Birth</label>
+                <label for="child_0_date_of_birth" class="col-sm-3 col-form-label">Date of Birth</label>
                 <div class="col-sm-2">
-                    <input type="date"
+                    <input id="child_0_date_of_birth" type="date"
                         class="form-control @error('children.0.date_of_birth') is-invalid @enderror"
                         name="children[0][date_of_birth]"
                         value="{{ old('children.0.date_of_birth') }}"
@@ -281,9 +281,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Residency Status</label>
+                <label for="child_0_residency_status" class="col-sm-3 col-form-label">Residency Status</label>
                 <div class="col-sm-3">
-                    <select class="form-select @error('children.0.residency_status') is-invalid @enderror"
+                    <select id="child_0_residency_status" class="form-select @error('children.0.residency_status') is-invalid @enderror"
                         name="children[0][residency_status]"
                         required>
                         <option value="Citizen"
@@ -306,9 +306,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Day School Name</label>
+                <label for="child_0_day_school_name" class="col-sm-3 col-form-label">Day School Name</label>
                 <div class="col-sm-7">
-                    <input type="text"
+                    <input id="child_0_day_school_name" type="text"
                         class="form-control @error('children.0.day_school_name') is-invalid @enderror"
                         name="children[0][day_school_name]"
                         value="{{ old('children.0.day_school_name') }}"
@@ -320,9 +320,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Current School Grade in {{ date('Y') }}</label>
+                <label for="child_0_day_school_year" class="col-sm-3 col-form-label">Current School Grade in {{ date('Y') }}</label>
                 <div class="col-sm-2">
-                    <select class="form-select @error('children.0.day_school_year') is-invalid @enderror"
+                    <select id="child_0_day_school_year" class="form-select @error('children.0.day_school_year') is-invalid @enderror"
                         name="children[0][day_school_year]"
                         required>
                         <option value="Pre School"
@@ -389,9 +389,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Allergies</label>
+                <label for="child_0_allergies" class="col-sm-3 col-form-label">Allergies</label>
                 <div class="col-sm-7">
-                    <input type="text"
+                    <input id="child_0_allergies" type="text"
                         class="form-control @error('children.0.allergies') is-invalid @enderror"
                         name="children[0][allergies]"
                         value="{{ old('children.0.allergies', 'None') }}">
@@ -402,9 +402,9 @@
             </div>
 
             <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">Special Needs</label>
+                <label for="child_0_special_needs" class="col-sm-3 col-form-label">Special Needs</label>
                 <div class="col-sm-7">
-                    <input type="text"
+                    <input id="child_0_special_needs" type="text"
                         class="form-control @error('children.0.special_needs') is-invalid @enderror"
                         name="children[0][special_needs]"
                         value="{{ old('children.0.special_needs', 'None') }}">
@@ -416,8 +416,8 @@
 
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" 
-                    name="children[0][photography_allowed]" 
+                    <input type="checkbox"
+                    name="children[0][photography_allowed]"
                     {{ old('photography_allowed') ? 'checked' : ''}}>
                     I consent to my child's photo appearing on the school website
                 </label>
@@ -450,14 +450,14 @@
     <!-- Guidelines (optional) -->
     <div class="checkbox">
         <label>
-            <input type="checkbox" 
-            name="guidelines_accepted" 
+            <input type="checkbox"
+            name="guidelines_accepted"
             {{ old('guidelines_accepted') ? 'checked' : ''}} required>
             I accept the school <a href="/guidelines" target="_blank">guidelines</a>
         </label>
     </div>
 
-    <hr />    
+    <hr />
 
     <!-- Buttons to dynamically manage children blocks -->
     <button type="button" class="btn btn-outline-primary mb-3" id="addChildBtn">

@@ -5,7 +5,7 @@
     It contains a unique link allowing them to modify their info and re-pay if needed.
 -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Update Your Registration</title>

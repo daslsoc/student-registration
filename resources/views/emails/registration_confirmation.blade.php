@@ -6,7 +6,7 @@
     (with CSS, tables, etc.) if desired.
 -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Registration Confirmation</title>

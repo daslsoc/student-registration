@@ -19,6 +19,19 @@ export function renameChildField(name, index) {
 }
 
 /**
+ * Same for the element ids that link each child field to its <label>
+ * (`child_0_first_name` -> `child_2_first_name`), so a cloned block keeps
+ * unique ids and its labels keep pointing at their own controls.
+ */
+export function renameChildId(id, index) {
+    if (typeof id !== 'string') {
+        return id;
+    }
+
+    return id.replace(/^child_\d+_/, `child_${index}_`);
+}
+
+/**
  * The form must always keep at least one child block. Returns true only when
  * removing one still leaves a child behind.
  */
@@ -68,6 +81,9 @@ export function initRegistrationForm(doc = document) {
             if (name) {
                 el.setAttribute('name', renameChildField(name, childIndex));
             }
+            if (el.id) {
+                el.id = renameChildId(el.id, childIndex);
+            }
             el.classList.remove('is-invalid');
             el.value = '';
             // Allergies / special needs default to "None" so the common
@@ -75,6 +91,10 @@ export function initRegistrationForm(doc = document) {
             if (name && (name.includes('[allergies]') || name.includes('[special_needs]'))) {
                 el.value = 'None';
             }
+        });
+
+        newBlock.querySelectorAll('label[for]').forEach((label) => {
+            label.htmlFor = renameChildId(label.htmlFor, childIndex);
         });
 
         container.appendChild(newBlock);

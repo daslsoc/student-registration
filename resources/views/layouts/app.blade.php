@@ -40,9 +40,9 @@
           <a class="nav-link {{ request()->routeIs('help') ? 'active' : '' }}" @if(request()->routeIs('help')) aria-current="page" @endif href="{{route('help')}}">Help</a>
           @if (Auth::check())
           <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
               Admin
-            </a>
+            </button>
             {{-- Each link is shown only to roles that carry the matching
                  permission — the routes enforce the same atoms server-side, so
                  hiding a link is convenience, not the control. --}}

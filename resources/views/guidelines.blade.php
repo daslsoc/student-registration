@@ -5,8 +5,8 @@
 @section('content')
 <div class="row">
   <div class="col-3">
-    <nav id="navbar-guidelines" class="navbar navbar-light bg-light flex-column align-items-stretch p-3 position-sticky top-0" style="height: 100vh; overflow-y: auto;">
-      <nav class="nav nav-pills flex-column">
+    <nav id="navbar-guidelines" aria-label="Guidelines sections" class="navbar navbar-light bg-light flex-column align-items-stretch p-3 position-sticky top-0" style="height: 100vh; overflow-y: auto;">
+      <nav class="nav nav-pills flex-column" aria-label="On this page">
         <a class="nav-link" href="#introduction">Introduction</a>
         <a class="nav-link" href="#what-is-school">What Is the School?</a>
         <a class="nav-link" href="#timetable">School Timetable</a>
@@ -21,7 +21,7 @@
       </nav>
     </nav>
   </div>
-  <div class="col-9" data-bs-spy="scroll" data-bs-target="#navbar-guidelines" data-bs-offset="0" tabindex="0">
+  <div class="col-9" data-bs-spy="scroll" data-bs-target="#navbar-guidelines" data-bs-offset="0">
     <h1>Dhamma and Sinhala Language School of Canberra</h1>
 
     <h2 id="introduction">Rules, Guidelines and Responsibilities</h2>

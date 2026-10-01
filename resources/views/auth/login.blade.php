@@ -1,7 +1,7 @@
 <!--
     resources/views/auth/login.blade.php
 
-    Simple login form. Copy/paste into your project. 
+    Simple login form. Copy/paste into your project.
     Adjust styling as needed (Bootstrap classes).
 -->
 
@@ -38,29 +38,29 @@
   @csrf
   <div class="mb-3">
     <label for="email" class="form-label">Email</label>
-    <input type="email" 
-           class="form-control @error('email') is-invalid @enderror" 
-           name="email" 
+    <input type="email"
+           class="form-control @error('email') is-invalid @enderror"
+           name="email"
            id="email"
-           value="{{ old('email') }}" 
+           value="{{ old('email') }}"
            required
            autofocus>
   </div>
 
   <div class="mb-3">
     <label for="password" class="form-label">Password</label>
-    <input type="password" 
-           class="form-control @error('password') is-invalid @enderror" 
-           name="password" 
+    <input type="password"
+           class="form-control @error('password') is-invalid @enderror"
+           name="password"
            id="password"
            required>
   </div>
 
   <div class="mb-3 form-check">
-    <input type="checkbox" 
-           class="form-check-input" 
-           id="remember" 
-           name="remember" 
+    <input type="checkbox"
+           class="form-check-input"
+           id="remember"
+           name="remember"
            {{ old('remember') ? 'checked' : '' }}>
     <label class="form-check-label" for="remember">Remember Me</label>
   </div>

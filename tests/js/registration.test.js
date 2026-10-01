@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
     renameChildField,
+    renameChildId,
     canRemoveChild,
     registrationPrice,
     initRegistrationForm,
@@ -27,6 +28,14 @@ describe('renameChildField', () => {
     it('is null-safe', () => {
         expect(renameChildField(null, 1)).toBe(null);
         expect(renameChildField(undefined, 1)).toBe(undefined);
+    });
+});
+
+describe('renameChildId', () => {
+    it('rewrites the child index prefix and leaves other ids alone', () => {
+        expect(renameChildId('child_0_first_name', 2)).toBe('child_2_first_name');
+        expect(renameChildId('parent1_first_name', 2)).toBe('parent1_first_name');
+        expect(renameChildId(undefined, 1)).toBe(undefined);
     });
 });
 
@@ -62,7 +71,8 @@ describe('initRegistrationForm', () => {
             <button id="removeChildBtn"></button>
             <div id="children-container">
                 <div class="child-block">
-                    <input name="children[0][first_name]" value="Existing" />
+                    <label for="child_0_first_name">Child First Name</label>
+                    <input id="child_0_first_name" name="children[0][first_name]" value="Existing" />
                     <select name="children[0][gender]"><option>Male</option></select>
                     <input name="children[0][allergies]" value="" />
                     <input name="children[0][special_needs]" value="" />
@@ -88,6 +98,17 @@ describe('initRegistrationForm', () => {
         const newInput = blocks[1].querySelector('input');
         expect(newInput.getAttribute('name')).toBe('children[1][first_name]');
         expect(newInput.value).toBe('');
+    });
+
+    it('re-indexes the ids and label targets so each label still names its own control', () => {
+        initRegistrationForm(document);
+        document.getElementById('addChildBtn').click();
+
+        const blocks = document.querySelectorAll('.child-block');
+        expect(blocks[1].querySelector('input').id).toBe('child_1_first_name');
+        expect(blocks[1].querySelector('label').htmlFor).toBe('child_1_first_name');
+        // The original block is untouched, so ids stay unique on the page.
+        expect(document.querySelectorAll('#child_0_first_name')).toHaveLength(1);
     });
 
     it('defaults a new child\'s allergies and special needs to "None"', () => {

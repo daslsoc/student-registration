@@ -70,7 +70,7 @@
             @error('parent1_last_name')
             <small class="text-danger">{{ $message }}</small>
             @enderror
-        </div>        
+        </div>
     </div>
 
     <!-- Parent 1 Email -->
@@ -255,9 +255,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Child First Name</label>
+                    <label for="child_{{ $index }}_first_name" class="col-sm-3 col-form-label">Child First Name</label>
                     <div class="col-sm-7">
-                        <input type="text"
+                        <input id="child_{{ $index }}_first_name" type="text"
                                 class="form-control @error('children.'.$index.'.first_name') is-invalid @enderror"
                                 name="children[{{ $index }}][first_name]"
                                 value="{{ old('children.'.$index.'.first_name', $child->first_name) }}"
@@ -267,11 +267,11 @@
                         @enderror
                     </div>
                 </div>
-                
+
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Child Last Name</label>
+                    <label for="child_{{ $index }}_last_name" class="col-sm-3 col-form-label">Child Last Name</label>
                     <div class="col-sm-7">
-                        <input type="text"
+                        <input id="child_{{ $index }}_last_name" type="text"
                                 class="form-control @error('children.'.$index.'.last_name') is-invalid @enderror"
                                 name="children[{{ $index }}][last_name]"
                                 value="{{ old('children.'.$index.'.last_name', $child->last_name) }}"
@@ -283,9 +283,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Gender</label>
+                    <label for="child_{{ $index }}_gender" class="col-sm-3 col-form-label">Gender</label>
                     <div class="col-sm-2">
-                        <select class="form-select @error('children.'.$index.'.gender') is-invalid @enderror"
+                        <select id="child_{{ $index }}_gender" class="form-select @error('children.'.$index.'.gender') is-invalid @enderror"
                                 name="children[{{ $index }}][gender]"
                                 required>
                             <option value="Male"   {{ old('children.'.$index.'.gender', $child->gender) == 'Male'   ? 'selected' : '' }}>Male</option>
@@ -298,9 +298,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Date of Birth</label>
+                    <label for="child_{{ $index }}_date_of_birth" class="col-sm-3 col-form-label">Date of Birth</label>
                     <div class="col-sm-2">
-                        <input type="date"
+                        <input id="child_{{ $index }}_date_of_birth" type="date"
                                 class="form-control @error('children.'.$index.'.date_of_birth') is-invalid @enderror"
                                 name="children[{{ $index }}][date_of_birth]"
                                 value="{{ old('children.'.$index.'.date_of_birth', $child->date_of_birth) }}"
@@ -312,9 +312,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Residency Status</label>
+                    <label for="child_{{ $index }}_residency_status" class="col-sm-3 col-form-label">Residency Status</label>
                     <div class="col-sm-3">
-                        <select class="form-select @error('children.'.$index.'.residency_status') is-invalid @enderror"
+                        <select id="child_{{ $index }}_residency_status" class="form-select @error('children.'.$index.'.residency_status') is-invalid @enderror"
                                 name="children[{{ $index }}][residency_status]"
                                 required>
                             <option value="Citizen"
@@ -335,11 +335,11 @@
                         @enderror
                     </div>
                 </div>
-                
+
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Day School Name</label>
+                    <label for="child_{{ $index }}_day_school_name" class="col-sm-3 col-form-label">Day School Name</label>
                     <div class="col-sm-7">
-                        <input type="text"
+                        <input id="child_{{ $index }}_day_school_name" type="text"
                                 class="form-control @error('children.'.$index.'.day_school_name') is-invalid @enderror"
                                 name="children[{{ $index }}][day_school_name]"
                                 value="{{ old('children.'.$index.'.day_school_name', $child->day_school_name) }}"
@@ -351,9 +351,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Current School Grade in {{ date('Y') }}</label>
+                    <label for="child_{{ $index }}_day_school_year" class="col-sm-3 col-form-label">Current School Grade in {{ date('Y') }}</label>
                     <div class="col-sm-2">
-                        <select class="form-select @error('children.0.day_school_year') is-invalid @enderror"
+                        <select id="child_{{ $index }}_day_school_year" class="form-select @error('children.0.day_school_year') is-invalid @enderror"
                             name="children[{{ $index }}][day_school_year]"
                             required>
                             <option value="Pre School"
@@ -412,7 +412,7 @@
                                 {{ old('children.'.$index.'.day_school_year', $child->day_school_year) == 'Grade 12' ? 'selected' : '' }}>
                                 Grade 12
                             </option>
-                        </select>                        
+                        </select>
                         @error('children.'.$index.'.day_school_year')
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
@@ -420,9 +420,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Allergies</label>
+                    <label for="child_{{ $index }}_allergies" class="col-sm-3 col-form-label">Allergies</label>
                     <div class="col-sm-7">
-                        <input type="text"
+                        <input id="child_{{ $index }}_allergies" type="text"
                                 class="form-control @error('children.'.$index.'.allergies') is-invalid @enderror"
                                 name="children[{{ $index }}][allergies]"
                                 value="{{ old('children.'.$index.'.allergies', $child->allergies) }}">
@@ -433,9 +433,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Special Needs</label>
+                    <label for="child_{{ $index }}_special_needs" class="col-sm-3 col-form-label">Special Needs</label>
                     <div class="col-sm-7">
-                        <input type="text"
+                        <input id="child_{{ $index }}_special_needs" type="text"
                                 class="form-control @error('children.'.$index.'.special_needs') is-invalid @enderror"
                                 name="children[{{ $index }}][special_needs]"
                                 value="{{ old('children.'.$index.'.special_needs', $child->special_needs) }}">
@@ -446,9 +446,9 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label">Year First Registered</label>
+                    <label for="child_{{ $index }}_year_of_first_registration" class="col-sm-3 col-form-label">Year First Registered</label>
                     <div class="col-sm-2">
-                        <input type="text"
+                        <input id="child_{{ $index }}_year_of_first_registration" type="text"
                                 class="form-control @error('children.'.$index.'.year_of_first_registration') is-invalid @enderror"
                                 name="children[{{ $index }}][year_of_first_registration]"
                                 value="{{ old('children.'.$index.'.year_of_first_registration', $child->year_of_first_registration) }}">
@@ -461,12 +461,12 @@
                 <div class="checkbox">
                     <label>
                         <input type="checkbox"
-                        name="children[{{ $index }}][photography_allowed]" 
+                        name="children[{{ $index }}][photography_allowed]"
                         @checked($child->photography_allowed)>
                         I consent to my child's photo appearing on the school website
                     </label>
                 </div>
-            
+
                 <hr />
             </div>
             @php $lastIndex = $index; @endphp
@@ -494,14 +494,14 @@
     <!-- Guidelines (optional) -->
     <div class="checkbox">
         <label>
-            <input type="checkbox" 
-            name="guidelines_accepted" 
+            <input type="checkbox"
+            name="guidelines_accepted"
             @checked($parent->guidelines_accepted) required>
             I accept the school <a href="/guidelines" target="_blank">guidelines</a>
         </label>
     </div>
 
-    <hr />       
+    <hr />
 
     <!-- Buttons to dynamically add new child blocks -->
     <button type="button" class="btn btn-outline-primary mb-3" id="addChildBtn">+ Add Another Child</button>
@@ -569,8 +569,12 @@
             // We'll replace the bracketed index with our new childIndex
             let bracketIndex = oldName.match(/\[\d+\]/);
             if (bracketIndex) {
-                                    let newName = oldName.replace(bracketIndex[0], `[${childIndex}]`);
+                let newName = oldName.replace(bracketIndex[0], `[${childIndex}]`);
                 el.setAttribute('name', newName);
+            }
+            // Keep ids unique and labels pointing at their own control.
+            if (el.id) {
+                el.id = el.id.replace(/^child_\d+_/, `child_${childIndex}_`);
             }
             // Clear any is-invalid classes or old values
             el.classList.remove('is-invalid');
@@ -579,6 +583,10 @@
             if (oldName && (oldName.includes('[allergies]') || oldName.includes('[special_needs]'))) {
                 el.value = 'None';
             }
+        });
+
+        newBlock.querySelectorAll('label[for]').forEach(label => {
+            label.htmlFor = label.htmlFor.replace(/^child_\d+_/, `child_${childIndex}_`);
         });
 
         childrenContainer.appendChild(newBlock);

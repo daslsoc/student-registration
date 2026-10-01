@@ -31,7 +31,7 @@
                         <td class="text-nowrap">{{ $child->first_name }} {{ $child->last_name }}</td>
                         <td class="text-nowrap">{{ $child->day_school_year }}</td>
                         <td>
-                            <select name="allocations[{{ $child->student_number }}][dhamma]" class="form-select form-select-sm">
+                            <select name="allocations[{{ $child->student_number }}][dhamma]" class="form-select form-select-sm" aria-label="Dhamma class for {{ $child->first_name }} {{ $child->last_name }}">
                                 <option value="">— None —</option>
                                 @foreach ($classes as $class)
                                     <option value="{{ $class }}" @selected($child->allocated_dhamma_class === $class)>{{ $class }}</option>
@@ -39,7 +39,7 @@
                             </select>
                         </td>
                         <td>
-                            <select name="allocations[{{ $child->student_number }}][sinhala]" class="form-select form-select-sm">
+                            <select name="allocations[{{ $child->student_number }}][sinhala]" class="form-select form-select-sm" aria-label="Sinhala class for {{ $child->first_name }} {{ $child->last_name }}">
                                 <option value="">— None —</option>
                                 @foreach ($classes as $class)
                                     <option value="{{ $class }}" @selected($child->allocated_sinhala_class === $class)>{{ $class }}</option>
