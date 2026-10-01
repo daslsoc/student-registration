@@ -184,9 +184,11 @@ class AdminController extends Controller
             }
         }
 
-        $status = $notified > 0
-            ? "Allocations updated. {$notified} ".($notified === 1 ? 'family was' : 'families were').' notified by email.'
-            : 'Allocations updated.';
+        $status = 'Allocations updated.';
+        if ($notified > 0) {
+            $families = $notified === 1 ? 'family was' : 'families were';
+            $status .= " {$notified} {$families} notified by email.";
+        }
 
         // Return to whichever page submitted the form (the search page keeps
         // the admin on their results); fall back to the unallocated worklist.
@@ -225,7 +227,7 @@ class AdminController extends Controller
      * eftpos at the desk (mark as paid), or to correct a mistake (revert). Lists
      * families with their current status and shows the recent audit trail.
      */
-    public function showPaymentOverride(Request $request)
+    public function showPaymentOverride()
     {
         $parents = ParentModel::withCount('children')
             ->with(['payments' => fn ($q) => $q->whereNotNull('paid_date')])
@@ -315,7 +317,7 @@ class AdminController extends Controller
                 }
             }
 
-            $audit = PaymentOverride::create([
+            PaymentOverride::create([
                 'parent_id' => $parent->id,
                 'user_id' => Auth::id(),
                 'performed_by' => Auth::user()?->name,

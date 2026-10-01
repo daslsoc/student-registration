@@ -300,7 +300,7 @@ class RegistrationController extends Controller
      * @param  string  $token
      * @return View
      */
-    public function showUpdateForm(Request $request, $token)
+    public function showUpdateForm($token)
     {
         try {
             $parent = ParentModel::where('update_token', $token)
@@ -412,7 +412,7 @@ class RegistrationController extends Controller
     public function handleCsvImport(Request $request)
     {
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt',
+            'csv_file' => 'required|file|mimes:csv,txt|max:5120',
             'default_registration_year' => 'required|integer|min:1900|max:'.now()->year,
         ]);
 
