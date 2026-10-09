@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: php_app
     volumes:
       # Mount the entire project so changes are reflected immediately in dev
       - ./:/var/www/html
@@ -27,7 +26,6 @@ services:
   # Nginx container
   nginx:
     image: nginx:latest
-    container_name: nginx_web
     depends_on:
       - app
     volumes:
@@ -43,7 +41,6 @@ services:
   # MySQL DB
   db:
     image: mysql:8
-    container_name: mysql_db
     environment:
       MYSQL_DATABASE: laravel_db
       MYSQL_USER: laravel_user
@@ -57,7 +54,6 @@ services:
   # Redis for caching & queue
   redis:
     image: redis:alpine
-    container_name: redis_cache
     networks:
       - laravel_net
 
@@ -66,7 +62,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: queue_worker
     command: php artisan queue:work --verbose --tries=3 --timeout=90
     depends_on:
       - app
