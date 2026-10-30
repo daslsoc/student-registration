@@ -719,8 +719,13 @@
         @php
           $rosterContactName = config('custom.contacts.tea_roster_name') ?: 'the tea roster coordinator';
           $rosterContactPhone = config('custom.contacts.tea_roster_phone');
+          // Built here, not with an inline @if: Blade ignores "@endif" straight
+          // after a letter ("WhatsApp@endif"), which left the if unclosed.
+          $rosterContactVia = $rosterContactPhone
+              ? ' on <strong>'.e($rosterContactPhone).'</strong> via SMS or WhatsApp'
+              : '';
         @endphp
-        <p>For further information or coordination, please contact <strong>{{ $rosterContactName }}</strong>@if ($rosterContactPhone) on <strong>{{ $rosterContactPhone }}</strong> via SMS or WhatsApp@endif.</p>
+        <p>For further information or coordination, please contact <strong>{{ $rosterContactName }}</strong>{!! $rosterContactVia !!}.</p>
       </li>
       <li>
         <p>Any serious or repeated breach of rules will be addressed by:</p>
