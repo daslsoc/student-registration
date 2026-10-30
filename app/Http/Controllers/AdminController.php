@@ -374,7 +374,8 @@ class AdminController extends Controller
 
         $callback = function () use ($parents, $columns) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
+            // escape: '' writes RFC 4180 CSV (PHP 8.4 deprecates the "\\" default).
+            fputcsv($file, $columns, escape: '');
 
             foreach ($parents as $parent) {
                 // For each child in children
@@ -402,7 +403,7 @@ class AdminController extends Controller
                         $child->allocated_dhamma_class,
                         $child->allocated_sinhala_class,
                     ];
-                    fputcsv($file, $row);
+                    fputcsv($file, $row, escape: '');
                 }
             }
 
