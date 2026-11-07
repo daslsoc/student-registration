@@ -268,54 +268,9 @@ class AdminController extends Controller
         $markPaid = $validated['action'] === PaymentOverride::ACTION_MARKED_PAID;
 
         DB::transaction(function () use ($parent, $validated, $markPaid, $allocator, $previousStatus) {
-            $amount = null;
-
-            if ($markPaid) {
-                // A waived fee completes the registration at $0; cash/eftpos use
-                // the entered amount or fall back to the standard fee.
-                $amount = $validated['amount']
-                    ?? ($validated['method'] === PaymentOverride::METHOD_WAIVED
-                        ? 0
-                        : $this->priceForChildCount($parent->children->count()));
-
-                Payment::create([
-                    'parent_id' => $parent->id,
-                    'amount_paid' => $amount,
-                    'paid_date' => now(),
-                    'method' => $validated['method'],
-                ]);
-
-                $parent->update(['registration_status' => ParentModel::STATUS_COMPLETED]);
-
-                // Allocate each child from their day-school year, like the online
-                // flow, so attendance enrols them on the next sync.
-                foreach ($parent->children as $child) {
-                    $class = $allocator->classForGrade($child->day_school_year);
-                    if ($class !== null) {
-                        $child->update([
-                            'allocated_dhamma_class' => $class,
-                            'allocated_sinhala_class' => $class,
-                        ]);
-                    }
-                }
-            } else {
-                // Revert: void the recorded payments and return to pending.
-                $parent->payments()->delete();
-                $parent->update(['registration_status' => ParentModel::STATUS_PENDING]);
-
-                // Clear allocations so the children drop off the attendance
-                // roster on the next sync (they're no longer paid). $child->update
-                // bumps updated_at, which the integration delta uses to surface
-                // the removal.
-                foreach ($parent->children as $child) {
-                    if ($child->allocated_dhamma_class !== null || $child->allocated_sinhala_class !== null) {
-                        $child->update([
-                            'allocated_dhamma_class' => null,
-                            'allocated_sinhala_class' => null,
-                        ]);
-                    }
-                }
-            }
+            $amount = $markPaid
+                ? $this->applyMarkPaid($parent, $validated, $allocator)
+                : $this->applyRevert($parent);
 
             PaymentOverride::create([
                 'parent_id' => $parent->id,
@@ -337,16 +292,84 @@ class AdminController extends Controller
             'by_user_id' => Auth::id(),
         ]);
 
-        $name = trim($parent->parent1_first_name.' '.$parent->parent1_last_name);
-        if (! $markPaid) {
-            $message = "Reverted {$name} to pending and voided their payments.";
-        } elseif ($validated['method'] === PaymentOverride::METHOD_WAIVED) {
-            $message = "Waived the fee for {$name} — registration completed.";
-        } else {
-            $message = "Recorded {$validated['method']} payment for {$name} — registration completed.";
-        }
+        $message = $this->paymentOverrideMessage($parent, $validated['method'] ?? null, $markPaid);
 
         return redirect()->route('admin.payment_override')->with('status', $message);
+    }
+
+    /**
+     * Mark paid: record a cash/eftpos/waived Payment, complete the
+     * registration and allocate the children. Returns the amount recorded.
+     */
+    private function applyMarkPaid(ParentModel $parent, array $validated, ClassAllocator $allocator): mixed
+    {
+        // A waived fee completes the registration at $0; cash/eftpos use the
+        // entered amount or fall back to the standard fee.
+        $amount = $validated['amount']
+            ?? ($validated['method'] === PaymentOverride::METHOD_WAIVED
+                ? 0
+                : $this->priceForChildCount($parent->children->count()));
+
+        Payment::create([
+            'parent_id' => $parent->id,
+            'amount_paid' => $amount,
+            'paid_date' => now(),
+            'method' => $validated['method'],
+        ]);
+
+        $parent->update(['registration_status' => ParentModel::STATUS_COMPLETED]);
+
+        // Allocate each child from their day-school year, like the online
+        // flow, so attendance enrols them on the next sync.
+        foreach ($parent->children as $child) {
+            $class = $allocator->classForGrade($child->day_school_year);
+            if ($class !== null) {
+                $child->update([
+                    'allocated_dhamma_class' => $class,
+                    'allocated_sinhala_class' => $class,
+                ]);
+            }
+        }
+
+        return $amount;
+    }
+
+    /**
+     * Revert: void the recorded payments, return the family to pending and
+     * clear the allocations. Returns null (no amount on a revert).
+     */
+    private function applyRevert(ParentModel $parent): null
+    {
+        $parent->payments()->delete();
+        $parent->update(['registration_status' => ParentModel::STATUS_PENDING]);
+
+        // Clear allocations so the children drop off the attendance roster on
+        // the next sync (they're no longer paid). $child->update bumps
+        // updated_at, which the integration delta uses to surface the removal.
+        foreach ($parent->children as $child) {
+            if ($child->allocated_dhamma_class !== null || $child->allocated_sinhala_class !== null) {
+                $child->update([
+                    'allocated_dhamma_class' => null,
+                    'allocated_sinhala_class' => null,
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    private function paymentOverrideMessage(ParentModel $parent, ?string $method, bool $markPaid): string
+    {
+        $name = trim($parent->parent1_first_name.' '.$parent->parent1_last_name);
+
+        if (! $markPaid) {
+            return "Reverted {$name} to pending and voided their payments.";
+        }
+        if ($method === PaymentOverride::METHOD_WAIVED) {
+            return "Waived the fee for {$name} — registration completed.";
+        }
+
+        return "Recorded {$method} payment for {$name} — registration completed.";
     }
 
     /**
