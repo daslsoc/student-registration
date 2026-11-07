@@ -365,7 +365,7 @@ class AdminController extends Controller
         $parents = ParentModel::with('children')->get();
 
         $columns = [
-            'Parent1FirstName', 'Parent1LastName', 'Parent1Email', 'Parent1Phone',
+            'PaymentStatus', 'StudentID', 'Parent1FirstName', 'Parent1LastName', 'Parent1Email', 'Parent1Phone',
             'Parent2FirstName', 'Parent2LastName', 'Parent2Email', 'Parent2Phone',
             'EmergencyContact', 'EmergencyPhone', 'Relationship', 'ChildFirstName',
             'ChildLastName', 'DOB', 'Residency', 'SchoolName', 'SchoolYear', 'Allergies',
@@ -381,6 +381,9 @@ class AdminController extends Controller
                 // For each child in children
                 foreach ($parent->children as $child) {
                     $row = [
+                        // Same per-year truth as the list page and Child::scopePaid().
+                        $parent->registration_status === ParentModel::STATUS_COMPLETED ? 'Paid' : 'Pending',
+                        $child->student_number,
                         $parent->parent1_first_name,
                         $parent->parent1_last_name,
                         $parent->parent1_email,
