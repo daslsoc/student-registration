@@ -185,5 +185,38 @@ class AdminExportCsvTest extends TestCase
         $this->assertStringContainsString('SchoolName', $csvContent);
         $this->assertStringContainsString('AllocatedDhammaClass', $csvContent);
         $this->assertStringContainsString('AllocatedSinhalaClass', $csvContent);
+        $this->assertStringContainsString('StudentID', $csvContent);
+        $this->assertStringContainsString('PaymentStatus', $csvContent);
+    }
+
+    /**
+     * Each row carries the child's student ID and the family's payment status
+     * for the current year.
+     */
+    public function test_export_csv_includes_student_id_and_payment_status()
+    {
+        $this->actingAs(User::factory()->create());
+
+        $paid = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_COMPLETED]);
+        Child::factory()->create(['parent_id' => $paid->id, 'first_name' => 'PaidKid', 'student_number' => 4321]);
+
+        $pending = ParentModel::factory()->create(['registration_status' => ParentModel::STATUS_PENDING]);
+        Child::factory()->create(['parent_id' => $pending->id, 'first_name' => 'PendingKid', 'student_number' => 8765]);
+
+        $response = $this->get('/admin/export-csv');
+        $response->assertStatus(200);
+
+        ob_start();
+        $response->baseResponse->send();
+        $lines = array_filter(explode("\n", ob_get_clean()));
+        $rows = array_map(fn ($line) => str_getcsv($line, escape: ''), $lines);
+        $header = array_shift($rows);
+        $rows = array_map(fn ($row) => array_combine($header, $row), $rows);
+        $byName = array_column($rows, null, 'ChildFirstName');
+
+        $this->assertSame('4321', $byName['PaidKid']['StudentID']);
+        $this->assertSame('Paid', $byName['PaidKid']['PaymentStatus']);
+        $this->assertSame('8765', $byName['PendingKid']['StudentID']);
+        $this->assertSame('Pending', $byName['PendingKid']['PaymentStatus']);
     }
 }

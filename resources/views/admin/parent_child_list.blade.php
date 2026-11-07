@@ -36,7 +36,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($parents as $parent)
+            @foreach($parents as $parent)
                 @foreach($parent->children as $child)
                     <tr>
                         <td>
@@ -79,9 +79,7 @@
                         </td>
                     </tr>
                 @endforeach
-            @empty
-                <tr><td colspan="6" class="text-center text-muted">No families match this filter.</td></tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 </div>
@@ -92,7 +90,12 @@
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js" integrity="sha384-ON66nBewQ67SNHiJWBO8f7ldsYeQ6wShDTaaikVGjNyNxC7P2rTge/Gf77mL/Ijt" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function () {
-        $('#parent-child-table').DataTable({ pageLength: 25, order: [] });
+        // DataTables rejects a colspan placeholder row, so it renders the empty message itself.
+        $('#parent-child-table').DataTable({
+            pageLength: 25,
+            order: [],
+            language: { emptyTable: 'No families match this filter.' },
+        });
     });
 </script>
 @endsection
