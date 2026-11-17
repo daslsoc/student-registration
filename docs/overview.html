@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Registration — Project Overview</title>
+<style>
+  :root{
+    --ink:#0f172a; --ink2:#334155; --muted:#64748b; --line:#e2e8f0; --bg:#f8fafc; --card:#ffffff;
+    --indigo:#4f46e5; --indigo-bg:#eef2ff; --teal:#0d9488; --teal-bg:#f0fdfa;
+    --amber:#b45309; --amber-bg:#fffbeb; --red:#dc2626; --red-bg:#fef2f2;
+    --green:#16a34a; --green-bg:#f0fdf4; --slate-bg:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45;-webkit-font-smoothing:antialiased;}
+  .page{max-width:1180px;margin:0 auto;padding:28px 28px 40px;}
+  header.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;
+    border-bottom:3px solid var(--ink);padding-bottom:16px;margin-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .logo{width:46px;height:46px;border-radius:11px;background:linear-gradient(135deg,var(--indigo),#7c3aed);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;flex:0 0 auto;
+    box-shadow:0 6px 16px rgba(79,70,229,.35);}
+  h1{font-size:26px;margin:0;letter-spacing:-.4px;}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:3px;max-width:620px;}
+  .meta{text-align:right;font-size:11.5px;color:var(--muted);line-height:1.6;}
+  .meta b{color:var(--ink2);}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+  .pill.ok{background:var(--green-bg);color:var(--green);}
+  .pill.wip{background:var(--amber-bg);color:var(--amber);}
+
+  h2.section{font-size:12px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted);
+    margin:26px 0 12px;display:flex;align-items:center;gap:10px;}
+  h2.section::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .grid{display:grid;gap:12px;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;}
+  .feat .ic{font-size:17px;}
+  .feat h3{margin:6px 0 4px;font-size:13.5px;}
+  .feat p{margin:0;font-size:11.8px;color:var(--ink2);}
+
+  /* stack */
+  .stack .card{padding:12px 13px;}
+  .stack h3{margin:0 0 8px;font-size:12px;display:flex;align-items:center;gap:7px;color:var(--ink);}
+  .stack h3 .dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;}
+  .tag{font-size:11px;padding:3px 8px;border-radius:7px;background:var(--slate-bg);color:var(--ink2);
+    border:1px solid var(--line);white-space:nowrap;}
+  .tag.k{background:var(--indigo-bg);color:var(--indigo);border-color:#e0e7ff;font-weight:600;}
+
+  /* pipeline */
+  .flow{display:flex;align-items:stretch;gap:0;overflow:hidden;}
+  .step{flex:1;background:var(--card);border:1px solid var(--line);padding:12px 13px;position:relative;}
+  .step:first-child{border-radius:12px 0 0 12px;}
+  .step:last-child{border-radius:0 12px 12px 0;}
+  .step+.step{border-left:none;}
+  .step .n{width:22px;height:22px;border-radius:999px;background:var(--ink);color:#fff;font-size:12px;
+    font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:7px;}
+  .step h4{margin:0 0 3px;font-size:12.5px;}
+  .step p{margin:0;font-size:11px;color:var(--muted);}
+  .step .where{margin-top:7px;font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;}
+  .w-agent{color:var(--indigo);} .w-cloud{color:var(--teal);} .w-admin{color:var(--amber);}
+
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(var(--cols,6),1fr);gap:10px;}
+  .phase{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 11px 12px;}
+  .phase .ph{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.4px;}
+  .phase h4{margin:2px 0 8px;font-size:12.5px;line-height:1.2;}
+  .bar{height:6px;border-radius:999px;background:var(--line);overflow:hidden;margin-bottom:8px;}
+  .bar>span{display:block;height:100%;border-radius:999px;}
+  .phase ul{margin:0;padding:0;list-style:none;}
+  .phase li{font-size:10.6px;color:var(--ink2);padding-left:15px;position:relative;margin-bottom:3px;line-height:1.3;}
+  .phase li::before{position:absolute;left:0;top:0;font-size:10px;}
+  .phase li.d::before{content:"✓";color:var(--green);font-weight:700;}
+  .phase li.t::before{content:"○";color:var(--muted);}
+  .fraction{font-size:10.5px;font-weight:700;float:right;}
+
+  /* guardrails */
+  .guard{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .guard .card{border-width:1px;}
+  .guard .in{border-left:4px solid var(--green);}
+  .guard .out{border-left:4px solid var(--red);}
+  .guard h3{margin:0 0 7px;font-size:12.5px;display:flex;align-items:center;gap:6px;}
+  .guard ul{margin:0;padding-left:16px;}
+  .guard li{font-size:11.5px;color:var(--ink2);margin-bottom:3px;}
+
+  footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  code{background:var(--slate-bg);padding:1px 5px;border-radius:5px;font-size:11px;}
+  @media print{ body{background:#fff} .page{max-width:none;padding:0} .card,.phase,.step{break-inside:avoid} }
+  @media (max-width:860px){ .g3,.g4,.road,.flow{grid-template-columns:1fr;display:grid} .guard{grid-template-columns:1fr} .flow{gap:8px} .step,.step:first-child,.step:last-child{border-radius:12px;border-left:1px solid var(--line)} }
+</style>
+
+</head>
+<body>
+<div class="page">
+<header class="hero">
+<div class="brand">
+<div class="logo">🎓</div>
+<div>
+<h1>Student Registration</h1>
+<div class="sub">Saturday-school <b>enrolment and payments</b> for the Dhamma &amp; Sinhala School of Canberra. Parents register children and pay by Stripe; staff manage the roster, medical notes and class placement. It is the <b>source of truth</b> the sibling attendance and tea-roster apps sync from.</div>
+</div>
+</div>
+<div class="meta">
+<div>Repo <b>daslsoc/student-registration</b></div>
+<div>Stage <span class="pill ok">Production</span></div>
+<div>Live <b>student-registration.slbvc.org</b></div>
+<div>Host: DreamHost shared</div>
+<div>Data: <b>pii-high</b> (children's medical, payments)</div>
+<div>Updated 2026-11-17</div>
+</div>
+</header>
+
+<h2 class="section">Key features</h2>
+<div class="grid g4 feat">
+<div class="card"><div class="ic">👨‍👩‍👧</div><h3>Family registration</h3><p>Parents enter their details and every child; an update link lets them edit the registration later.</p></div>
+<div class="card"><div class="ic">💳</div><h3>Stripe payments</h3><p>Annual fees by Stripe Checkout; admin payment override marks paid or reverts with a reason.</p></div>
+<div class="card"><div class="ic">🏫</div><h3>Auto class allocation</h3><p>On payment, <code>ClassAllocator</code> maps day-school year → class using <code>config/integration.php</code>.</p></div>
+<div class="card"><div class="ic">🔀</div><h3>Class relocation</h3><p>Search any student and move class; parents are emailed when the class actually changes.</p></div>
+<div class="card"><div class="ic">🩺</div><h3>Allergies &amp; medical</h3><p>One page listing every student with a real allergy or special need, with class and contacts.</p></div>
+<div class="card"><div class="ic">🔗</div><h3>Integration API</h3><p>Token-gated <code>/api/integration/changes?since=</code> deltas for attendance and tea-roster; no contact/DOB data in the attendance feed.</p></div>
+<div class="card"><div class="ic">📥</div><h3>CSV import / export</h3><p>Bulk parent/child data, export includes payment status and student ID (RFC 4180).</p></div>
+<div class="card"><div class="ic">🔄</div><h3>Annual reset</h3><p>Each year families flip back to pending while payment history is kept.</p></div>
+<div class="card"><div class="ic">🔑</div><h3>Roles &amp; audit</h3><p>Staff roles with permission atoms and an append-only activity log.</p></div>
+<div class="card"><div class="ic">❓</div><h3>In-app help</h3><p>Screenshot-led parent guide at <code>/help</code> and staff guide at <code>/admin/help</code>.</p></div>
+<div class="card"><div class="ic">⚙️</div><h3>School-configurable</h3><p>Name, pricing, minimum age, WhatsApp link and Stripe key all come from <code>.env</code> / <code>config/custom.php</code>.</p></div>
+<div class="card"><div class="ic">🛡️</div><h3>Test-DB guard</h3><p><code>phpunit.xml</code> forces the test DB and <code>TestCase</code> re-asserts it, so tests can't wipe real data.</p></div>
+</div>
+
+<h2 class="section">Technology stack — end to end</h2>
+<div class="grid g4 stack">
+<div class="card">
+<h3><span class="dot" style="background:var(--indigo)"></span>Backend</h3>
+<div class="tags"><span class="tag k">PHP 8.4</span><span class="tag k">Laravel 13</span><span class="tag">league/csv</span><span class="tag">stripe-php</span><span class="tag">FormRequests</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--teal)"></span>Frontend</h3>
+<div class="tags"><span class="tag k">Blade</span><span class="tag">Bootstrap 5</span><span class="tag">Sass</span><span class="tag">Vite</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--amber)"></span>Payments</h3>
+<div class="tags"><span class="tag k">Stripe Checkout</span><span class="tag">payment override</span><span class="tag">webhook-free success handler</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--teal)"></span>Data</h3>
+<div class="tags"><span class="tag k">MySQL 8</span><span class="tag">DB_TIMEZONE session zone</span><span class="tag">Redis (dev cache/queue)</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--indigo)"></span>Integration</h3>
+<div class="tags"><span class="tag k">Bearer-token API</span><span class="tag">per-consumer tokens</span><span class="tag">delta sync (since=)</span><span class="tag">removed[] feed</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--green)"></span>Testing</h3>
+<div class="tags"><span class="tag k">PHPUnit 13</span><span class="tag k">Dusk + Selenium</span><span class="tag">Vitest</span><span class="tag">Pint</span><span class="tag">SonarQube</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--green)"></span>CI &amp; deps</h3>
+<div class="tags"><span class="tag k">GitHub Actions Tests</span><span class="tag">npm audit (runtime)</span><span class="tag">Dependabot auto-merge (7/14-day cooldown)</span></div>
+</div>
+<div class="card">
+<h3><span class="dot" style="background:var(--ink2)"></span>Hosting &amp; ops</h3>
+<div class="tags"><span class="tag k">DreamHost shared</span><span class="tag">files-on-top deploy</span><span class="tag">Backrest nightly</span><span class="tag">Loki log mirror</span><span class="tag">Docker dev stack (:8090)</span></div>
+</div>
+</div>
+
+<h2 class="section">How it works — end to end</h2>
+<div class="flow">
+<div class="step"><div class="n">1</div><h4>Register</h4><p>Parent fills in family and child details, including medical notes.</p><div class="where w-admin">Parent · public site</div></div>
+<div class="step"><div class="n">2</div><h4>Pay</h4><p>Stripe Checkout takes the annual fee; success marks the family paid.</p><div class="where w-cloud">Stripe → app</div></div>
+<div class="step"><div class="n">3</div><h4>Allocate</h4><p>Each paid child is placed in a Dhamma and Sinhala class from their school year.</p><div class="where w-cloud">App</div></div>
+<div class="step"><div class="n">4</div><h4>Confirm</h4><p>Confirmation email tells the parent the allocated class.</p><div class="where w-cloud">Email</div></div>
+<div class="step"><div class="n">5</div><h4>Manage</h4><p>Staff fix unallocated students, relocate classes, review medical list, override payments.</p><div class="where w-admin">Admin</div></div>
+<div class="step"><div class="n">6</div><h4>Sync out</h4><p>Attendance and tea-roster pull deltas from the integration API.</p><div class="where w-agent">API → sibling apps</div></div>
+</div>
+
+<h2 class="section">Roadmap &amp; current status</h2>
+<div class="road" style="--cols:5">
+<div class="phase">
+<div class="ph">BUILT <span class="fraction" style="color:var(--green)">4/4</span></div>
+<h4>Core registration</h4>
+<div class="bar"><span style="width:100%;background:var(--green)"></span></div>
+<ul>
+<li class="d">Family + child forms</li>
+<li class="d">Stripe payments</li>
+<li class="d">CSV import / export</li>
+<li class="d">Annual reset</li>
+</ul>
+</div>
+<div class="phase">
+<div class="ph">BUILT <span class="fraction" style="color:var(--green)">3/3</span></div>
+<h4>Integration</h4>
+<div class="bar"><span style="width:100%;background:var(--green)"></span></div>
+<ul>
+<li class="d">Class allocator</li>
+<li class="d">Changes API + removed[]</li>
+<li class="d">Tea-roster token</li>
+</ul>
+</div>
+<div class="phase">
+<div class="ph">BUILT <span class="fraction" style="color:var(--green)">3/3</span></div>
+<h4>Staff tools</h4>
+<div class="bar"><span style="width:100%;background:var(--green)"></span></div>
+<ul>
+<li class="d">Roles + audit log</li>
+<li class="d">Medical list</li>
+<li class="d">In-app help</li>
+</ul>
+</div>
+<div class="phase">
+<div class="ph">PLATFORM <span class="fraction" style="color:var(--green)">3/3</span></div>
+<h4>Kept current</h4>
+<div class="bar"><span style="width:100%;background:var(--green)"></span></div>
+<ul>
+<li class="d">PHP 8.4 / Laravel 13</li>
+<li class="d">Localhost ports, no container_name</li>
+<li class="d">DB_TIMEZONE fix</li>
+</ul>
+</div>
+<div class="phase">
+<div class="ph">README TODO <span class="fraction">0/4</span></div>
+<h4>Open items</h4>
+<div class="bar"><span style="width:0%"></span></div>
+<ul>
+<li class="t">0-children case</li>
+<li class="t">Child / Payment tests</li>
+<li class="t">Drop DOB if unused</li>
+<li class="t">Subscribe-yes email</li>
+</ul>
+</div>
+</div>
+
+<h2 class="section">Data handling — children's records</h2>
+<div class="guard">
+<div class="card in">
+<h3>✅ Rules</h3>
+<ul>
+<li>Only paid students and class codes go to the attendance feed</li>
+<li>Each consuming app gets its own revocable API token</li>
+<li>Tests only ever touch <code>student_reg_test</code> / <code>student_reg_dusk</code></li>
+<li>Medical page is behind staff login and permission atoms</li>
+</ul>
+</div>
+<div class="card out">
+<h3>⛔ Never</h3>
+<ul>
+<li>Expose parent contacts or DOB through the attendance API</li>
+<li>Run migrations or seeders against production from a dev box</li>
+<li>Commit Stripe keys or <code>.env</code></li>
+</ul>
+</div>
+</div>
+
+<footer>
+<div>Sibling apps: <b>student-attendance</b> (pulls enrolments) · <b>tea-roster</b> (pulls parent contacts). Security status: <code>estate/security/SCORECARD.md</code>.</div>
+<div>Deploy: <code>docs/deployment.md</code> · Ops: <code>docs/operations.md</code> · Security: <code>docs/security.md</code></div>
+</footer>
+
+</div>
+</body>
+</html>
